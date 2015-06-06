@@ -12,3 +12,8 @@
 vignettes/*.html
 vignettes/*.pdf
 .Rproj.user
+
+# knitr files
+R-data-workshop-figure/
+R-data-workshop.md
+R-data-workshop-rpubs.html
