@@ -11,13 +11,13 @@ Three hours, 50% lecture and 50% working examples and problems.
 Focus of this workshop
 ========================================================
 
-(TODO: data pipeline graphic)
+<img src="images/pipeline.png" width="1000" />
 
-Raw data -> process -> summarize -> analyze/plot/output
-
-Typically:
-- *Process* includes cleaning, filtering, reshaping, modifying, QC
-- *Summarize* includes applying functions, merging with ancillary data
+In a typical data pipline:
+- *Raw data* can come from many sources 
+- *Processing* includes cleaning, filtering, reshaping, modifying, QC
+- *Summarizing* includes applying functions, merging with ancillary data, computing group summaries
+- *Products* include output data, plots, statistical analyses
 
 
 Is R the right tool for the job?
@@ -515,8 +515,7 @@ type: section
 History lesson
 ========================================================
 
-graphic w/ R, data.table, plyr, dplyr, reshape, reshape2, tidyr
-
+<img src="images/history.png" width="900" />
 
 
 Summarizing and operating on data
