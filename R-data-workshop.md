@@ -151,6 +151,44 @@ summary(cars)
 Things you should know: data
 ========================================================
 
+- Basic data frame indexing
+
+```r
+cars[1,]
+```
+
+```
+  speed dist
+1     4    2
+```
+
+```r
+cars[c(1, 3:4),]
+```
+
+```
+  speed dist
+1     4    2
+3     7    4
+4     7   22
+```
+
+***
+
+
+```r
+# Rows and columns can be specified by number or name.
+cars[3, "dist"]
+```
+
+```
+[1] 4
+```
+
+
+Things you should know: data
+========================================================
+
 - How to *list* and *remove* objects
 
 ```r
@@ -219,7 +257,7 @@ qplot(speed, dist, data=cars)
 
 ***
 
-![plot of chunk unnamed-chunk-8](R-data-workshop-figure/unnamed-chunk-8-1.png) 
+![plot of chunk unnamed-chunk-10](R-data-workshop-figure/unnamed-chunk-10-1.png) 
 
 
 Quiz: Basics
@@ -250,11 +288,11 @@ y
 
 
 ```r
-x[1:2] # ?
+x[-1] # ?
 ```
 
 ```
-[1] -2 -1
+[1] -1  0  1  2
 ```
 
 ```r
@@ -598,18 +636,17 @@ Examining data frames
 For very large data frames, you might want to take a random sample of the rows to be able to plot or get a sense of things.
 
 ```r
-df <- data.frame(x=1:30, y="hi") # tricky
-df[sample(nrow(df), 3), ]
+library(babynames) # has 1,792,091 rows
+babynames[sample(nrow(babynames), 3), ]
 ```
 
 ```
-    x  y
-20 20 hi
-15 15 hi
-1   1 hi
+        year sex    name  n         prop
+1291048 1998   F    Ilyn  5 2.580798e-06
+507259  1954   F   Lesly 14 7.032805e-06
+1520955 2006   F Michell 89 4.263212e-05
 ```
-This example uses the extremely useful function `sample` to randomly sample from a vector.
-
+This uses the extremely useful function `sample` to randomly sample from a vector.
 
 
 Examining data frames
@@ -647,11 +684,11 @@ range(cars$dist)
 Subsetting data frames
 ========================================================
 
-There are two separate ways to subset data in base R.
+There are (at least) two separate ways to subset data in base R.
 
 
 ```r
-cars[cars$speed < 10,]
+cars[cars$speed < 8,]
 ```
 
 ```
@@ -660,15 +697,13 @@ cars[cars$speed < 10,]
 2     4   10
 3     7    4
 4     7   22
-5     8   16
-6     9   10
 ```
 
 ***
 
 
 ```r
-subset(cars, speed < 10)
+subset(cars, speed < 8)
 ```
 
 ```
@@ -677,15 +712,14 @@ subset(cars, speed < 10)
 2     4   10
 3     7    4
 4     7   22
-5     8   16
-6     9   10
 ```
+There can be subtle differences but you can generally consider these to be equivalent.
 
 
 Subsetting data frames
 ========================================================
 
-Make sure you understand that data frames are index by row *first* and column *second* (and in the case of multidimensional arrays the other dimensions follow).
+Data frames are indexed by row *first* and column *second* (in the more general case of multidimensional arrays, the other dimensions follow).
 
 ```r
 cars[1, ]
@@ -722,6 +756,33 @@ cars[2, -1]
 ```
 
 
+Subsetting data frames
+========================================================
+
+Finding and removing duplicates. Note the use of `which`.
+
+```r
+any(duplicated(cars$dist))
+```
+
+```
+[1] TRUE
+```
+
+```r
+dupes <- which(duplicated(cars$dist))
+print(dupes)
+```
+
+```
+ [1]  6 15 16 17 18 20 24 25 29 30 36 37 39 42 45
+```
+
+```r
+cars_nodupes <- cars[-dupes, ]
+```
+
+
 Examining data frames
 ========================================================
 
@@ -730,7 +791,7 @@ Examining data frames
 plot(cars$speed, cars$dist, main="We are NOT covering plotting!")
 ```
 
-![plot of chunk unnamed-chunk-30](R-data-workshop-figure/unnamed-chunk-30-1.png) 
+![plot of chunk unnamed-chunk-33](R-data-workshop-figure/unnamed-chunk-33-1.png) 
 
 
 Exercise: Examining data frames
@@ -778,8 +839,6 @@ nrow(subset(babynames, year < 1900))
 ```
 
 
-
-
 Cleaning data
 ========================================================
 
@@ -808,20 +867,75 @@ d$z <- as.factor(d$x)
 Computing on columns
 ========================================================
 
-This is usually trivial.
+This can be trivial....
 
 ```r
 d <- data.frame(x=1:3)
 d$y <- d$x * 2
-d$z <- ifelse(d$y == 4, "quatre", "pas quatre") 
+d$z <- cumsum(d$y)
+d$four <- ifelse(d$y == 4, "four", "not four") 
 d
 ```
 
 ```
-  x y          z
-1 1 2 pas quatre
-2 2 4     quatre
-3 3 6 pas quatre
+  x y  z     four
+1 1 2  2 not four
+2 2 4  6     four
+3 3 6 12 not four
+```
+
+
+Computing on columns
+========================================================
+
+...but not always. A rolling mean. TODO.
+
+
+Gotcha #2: length() and for()
+========================================================
+type: alert
+
+On the previous slide, we used `seq_along(d)` instead of `1:nrow(d)`. Why?
+
+Because if `d` has zero rows, we get undesirable behavior.
+
+
+```r
+d <- data.frame()  # 0 rows
+for(i in 1:nrow(d)) print(i)
+```
+
+```
+[1] 1
+[1] 0
+```
+
+```r
+for(i in seq_along(d)) print(i)
+```
+
+
+Computing on columns
+========================================================
+TODO: make this into an exercise
+...but not always. Here we have valve numbers (attached to a CO2 analyer), and need to know whenever the numbers change to a new sample so we can assign a sample number.
+
+```r
+valvenums <- c(1, 1, 2, 3, 3, 3, 1, 2, 2, 3)
+newvalveflag <- c(TRUE, valvenums[-length(valvenums)] != valvenums[-1])
+print(newvalveflag)
+```
+
+```
+ [1]  TRUE FALSE  TRUE  TRUE FALSE FALSE  TRUE  TRUE FALSE  TRUE
+```
+
+```r
+print(cumsum(newvalveflag))
+```
+
+```
+ [1] 1 1 2 3 3 3 4 5 5 6
 ```
 
 

@@ -98,6 +98,23 @@ summary(cars)
 Things you should know: data
 ========================================================
 
+- Basic data frame indexing
+```{r, echo=TRUE}
+cars[1,]
+cars[c(1, 3:4),]
+```
+
+***
+
+```{r, echo=TRUE}
+# Rows and columns can be specified by number or name.
+cars[3, "dist"]
+```
+
+
+Things you should know: data
+========================================================
+
 - How to *list* and *remove* objects
 ```{r, echo=TRUE}
 ls()
@@ -163,7 +180,7 @@ y
 ***
 
 ```{r}
-x[1:2] # ?
+x[-1] # ?
 data.frame(x=x, y=y)
 ```
 
@@ -467,11 +484,10 @@ Examining data frames
 
 For very large data frames, you might want to take a random sample of the rows to be able to plot or get a sense of things.
 ```{r}
-df <- data.frame(x=1:30, y="hi") # tricky
-df[sample(nrow(df), 3), ]
+library(babynames) # has 1,792,091 rows
+babynames[sample(nrow(babynames), 3), ]
 ```
-This example uses the extremely useful function `sample` to randomly sample from a vector.
-
+This uses the extremely useful function `sample` to randomly sample from a vector.
 
 
 Examining data frames
@@ -492,23 +508,24 @@ range(cars$dist)
 Subsetting data frames
 ========================================================
 
-There are two separate ways to subset data in base R.
+There are (at least) two separate ways to subset data in base R.
 
 ```{r}
-cars[cars$speed < 10,]
+cars[cars$speed < 8,]
 ```
 
 ***
 
 ```{r}
-subset(cars, speed < 10)
+subset(cars, speed < 8)
 ```
+There can be subtle differences but you can generally consider these to be equivalent.
 
 
 Subsetting data frames
 ========================================================
 
-Make sure you understand that data frames are index by row *first* and column *second* (and in the case of multidimensional arrays the other dimensions follow).
+Data frames are indexed by row *first* and column *second* (in the more general case of multidimensional arrays, the other dimensions follow).
 ```{r}
 cars[1, ]
 ```
@@ -523,6 +540,18 @@ Negative notation excludes!
 
 ```{r}
 cars[2, -1] 
+```
+
+
+Subsetting data frames
+========================================================
+
+Finding and removing duplicates. Note the use of `which`.
+```{r}
+any(duplicated(cars$dist))
+dupes <- which(duplicated(cars$dist))
+print(dupes)
+cars_nodupes <- cars[-dupes, ]
 ```
 
 
@@ -566,8 +595,6 @@ nrow(subset(babynames, year < 1900))
 ```
 
 
-
-
 Cleaning data
 ========================================================
 
@@ -595,12 +622,46 @@ d$z <- as.factor(d$x)
 Computing on columns
 ========================================================
 
-This is usually trivial.
+This can be trivial....
 ```{r}
 d <- data.frame(x=1:3)
 d$y <- d$x * 2
-d$z <- ifelse(d$y == 4, "quatre", "pas quatre") 
+d$z <- cumsum(d$y)
+d$four <- ifelse(d$y == 4, "four", "not four") 
 d
+```
+
+
+Computing on columns
+========================================================
+
+...but not always. A rolling mean. TODO.
+
+
+Gotcha #2: length() and for()
+========================================================
+type: alert
+
+On the previous slide, we used `seq_along(d)` instead of `1:nrow(d)`. Why?
+
+Because if `d` has zero rows, we get undesirable behavior.
+
+```{r}
+d <- data.frame()  # 0 rows
+for(i in 1:nrow(d)) print(i)
+for(i in seq_along(d)) print(i)
+```
+
+
+Computing on columns
+========================================================
+TODO: make this into an exercise
+...but not always. Here we have valve numbers (attached to a CO2 analyer), and need to know whenever the numbers change to a new sample so we can assign a sample number.
+```{r}
+valvenums <- c(1, 1, 2, 3, 3, 3, 1, 2, 2, 3)
+newvalveflag <- c(TRUE, valvenums[-length(valvenums)] != valvenums[-1])
+print(newvalveflag)
+print(cumsum(newvalveflag))
 ```
 
 
