@@ -641,10 +641,10 @@ babynames[sample(nrow(babynames), 3), ]
 ```
 
 ```
-        year sex    name  n         prop
-1291048 1998   F    Ilyn  5 2.580798e-06
-507259  1954   F   Lesly 14 7.032805e-06
-1520955 2006   F Michell 89 4.263212e-05
+        year sex     name  n         prop
+1214971 1995   M   Jacory 28 1.392739e-05
+1210278 1995   F Breeyana  5 2.603111e-06
+753001  1973   M    Faron 51 3.159546e-05
 ```
 This uses the extremely useful function `sample` to randomly sample from a vector.
 
@@ -867,7 +867,7 @@ d$z <- as.factor(d$x)
 Computing on columns
 ========================================================
 
-This can be trivial....
+This can be simple...
 
 ```r
 d <- data.frame(x=1:3)
@@ -884,18 +884,24 @@ d
 3 3 6 12 not four
 ```
 
+R provides a set of high performance functions for many of these tasks: `cumsum`, `cumprod`, `colMeans`, `colSums`, `rowMeans`, `rowSums`, etc.
+
 
 Computing on columns
 ========================================================
 
-...but not always. A rolling mean. TODO.
+...but not always. A rolling ('window') mean. TODO.
+
+* for loop
+* filter
+* package solutions: zoo::...  dplyr:....
 
 
-Gotcha #2: length() and for()
+Gotcha #2: sequences and for()
 ========================================================
 type: alert
 
-On the previous slide, we used `seq_along(d)` instead of `1:nrow(d)`. Why?
+In the previous example, we used `seq_along(d)` instead of `1:nrow(d)`. Why?
 
 Because if `d` has zero rows, we get undesirable behavior.
 
@@ -911,32 +917,75 @@ for(i in 1:nrow(d)) print(i)
 ```
 
 ```r
-for(i in seq_along(d)) print(i)
+for(i in seq_along(d))    # correct: no output
+  print(i) 
 ```
 
 
-Computing on columns
+Exercise: Computing on columns
 ========================================================
-TODO: make this into an exercise
-...but not always. Here we have valve numbers (attached to a CO2 analyer), and need to know whenever the numbers change to a new sample so we can assign a sample number.
+type: prompt
+incremental: true
+
+One recent problem I had involved a data frame with multiplexer valve numbers; in the experiment, the multiplexer was automatically switching between valves.
+
+Whenever the valve number changes, we want to assign a new sample number.
 
 ```r
-valvenums <- c(1, 1, 2, 3, 3, 3, 1, 2, 2, 3)
-newvalveflag <- c(TRUE, valvenums[-length(valvenums)] != valvenums[-1])
-print(newvalveflag)
+# analyzer is switching between valves 1, 2, and 3
+vnums <- c(1, 1, 2, 3, 3, 3, 1, 2, 2, 3)
+# there are 6 samples here: (1, 1), (2), (3, 3, 3), (1), (2, 2), (3)
+
+# There are ≥ two solutions
+# One is slow and functional, one fast and elegant
 ```
 
-```
- [1]  TRUE FALSE  TRUE  TRUE FALSE FALSE  TRUE  TRUE FALSE  TRUE
-```
+
+Exercise: Computing on columns
+========================================================
+type: prompt
+incremental: true
+
 
 ```r
-print(cumsum(newvalveflag))
+samplenums <- rep(1, length(vnums))
+s <- 1
+for(i in seq_along(vnums)[-1]) {
+  if(vnums[i] != vnums[i-1])
+    s <- s + 1
+  samplenums[i] <- s
+}
+samplenums
 ```
 
 ```
  [1] 1 1 2 3 3 3 4 5 5 6
 ```
+
+
+```r
+newvalve <- c(TRUE, vnums[-length(vnums)] != vnums[-1])
+cumsum(newvalve)
+```
+
+```
+ [1] 1 1 2 3 3 3 4 5 5 6
+```
+
+
+Exercise: Computing on columns - time
+========================================================
+type: prompt
+
+
+
+This has big consequences!
+
+For a data frame with 1,100,000 rows:
+
+***
+
+![plot of chunk unnamed-chunk-43](R-data-workshop-figure/unnamed-chunk-43-1.png) 
 
 
 Combining columns
@@ -1033,6 +1082,30 @@ incremental: true
 Summarizing and operating on data
 ========================================================
 type: section
+
+
+Summarizing and operating on data
+========================================================
+
+Intro - typical kinds of tasks
+
+
+The apply family
+========================================================
+
+Traditionally the *apply* family of functions was R's solution. 
+
+Function      | Description
+------------- | ------------
+base::apply   |  Apply Functions Over Array Margins
+base::by      |  Apply a Function to a Data Frame Split by Factors
+base::eapply  |  Apply a Function Over Values in an Environment
+base::lapply  |  Apply a Function over a List or Vector
+base::mapply  |  Apply a Function to Multiple List or Vector Arguments
+base::rapply  |  Recursively Apply a Function to a List
+base::tapply  |  Apply a Function Over a Ragged Array
+
+This table is copied from https://nsaunders.wordpress.com/2010/08/20/a-brief-introduction-to-apply-in-r/, which provides a simple, readable summary of these functions.
 
 
 Robustness and performance
