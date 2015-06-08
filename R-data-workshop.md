@@ -117,7 +117,6 @@ head(cars)  # a built-in dataset
 5     8   16
 6     9   10
 ```
-
 Data frames are the fundamental (in the sense of most frequently used) data type in R.
 
 
@@ -196,6 +195,15 @@ for(i in 1:4) { cat(i) }
 ```
 1234
 ```
+
+
+Things you should know: control flow
+========================================================
+
+The difference between a *script* and *command line*.
+
+In general, you want to use scripts.
+
 
 
 Things you should know: packages
@@ -507,7 +515,379 @@ The `read.table` family of functions can be slow and (generally) only read from 
 - Many specialized packages (e.g. `ncdf4` for netCDF)
 
 
-Getting data the way you want it
+Cleaning data
+========================================================
+type: section
+
+
+Examining data frames
+========================================================
+
+In most cases, after you've imported your data, it's in a `data.frame`. What now? Generally we'd like to look at it in various ways. The *generic* function `summary` is useful:
+
+```r
+summary(cars)
+```
+
+```
+     speed           dist       
+ Min.   : 4.0   Min.   :  2.00  
+ 1st Qu.:12.0   1st Qu.: 26.00  
+ Median :15.0   Median : 36.00  
+ Mean   :15.4   Mean   : 42.98  
+ 3rd Qu.:19.0   3rd Qu.: 56.00  
+ Max.   :25.0   Max.   :120.00  
+```
+
+
+Examining data frames
+========================================================
+
+
+```r
+nrow(cars)
+```
+
+```
+[1] 50
+```
+
+```r
+head(cars)
+```
+
+```
+  speed dist
+1     4    2
+2     4   10
+3     7    4
+4     7   22
+5     8   16
+6     9   10
+```
+
+***
+
+
+```r
+ncol(cars)
+```
+
+```
+[1] 2
+```
+
+```r
+tail(cars)
+```
+
+```
+   speed dist
+45    23   54
+46    24   70
+47    24   92
+48    24   93
+49    24  120
+50    25   85
+```
+
+
+Examining data frames
+========================================================
+
+For very large data frames, you might want to take a random sample of the rows to be able to plot or get a sense of things.
+
+```r
+df <- data.frame(x=1:30, y="hi") # tricky
+df[sample(nrow(df), 3), ]
+```
+
+```
+    x  y
+20 20 hi
+15 15 hi
+1   1 hi
+```
+This example uses the extremely useful function `sample` to randomly sample from a vector.
+
+
+
+Examining data frames
+========================================================
+
+
+```r
+names(cars)
+```
+
+```
+[1] "speed" "dist" 
+```
+
+```r
+unique(cars$speed)
+```
+
+```
+ [1]  4  7  8  9 10 11 12 13 14 15 16 17 18 19 20 22 23 24 25
+```
+
+***
+
+
+```r
+range(cars$dist)
+```
+
+```
+[1]   2 120
+```
+
+
+Subsetting data frames
+========================================================
+
+There are two separate ways to subset data in base R.
+
+
+```r
+cars[cars$speed < 10,]
+```
+
+```
+  speed dist
+1     4    2
+2     4   10
+3     7    4
+4     7   22
+5     8   16
+6     9   10
+```
+
+***
+
+
+```r
+subset(cars, speed < 10)
+```
+
+```
+  speed dist
+1     4    2
+2     4   10
+3     7    4
+4     7   22
+5     8   16
+6     9   10
+```
+
+
+Subsetting data frames
+========================================================
+
+Make sure you understand that data frames are index by row *first* and column *second* (and in the case of multidimensional arrays the other dimensions follow).
+
+```r
+cars[1, ]
+```
+
+```
+  speed dist
+1     4    2
+```
+
+***
+
+
+```r
+cars[1:3, ]
+```
+
+```
+  speed dist
+1     4    2
+2     4   10
+3     7    4
+```
+
+Negative notation excludes!
+
+
+```r
+cars[2, -1] 
+```
+
+```
+[1] 10
+```
+
+
+Examining data frames
+========================================================
+
+
+```r
+plot(cars$speed, cars$dist, main="We are NOT covering plotting!")
+```
+
+![plot of chunk unnamed-chunk-30](R-data-workshop-figure/unnamed-chunk-30-1.png) 
+
+
+Exercise: Examining data frames
+========================================================
+type: prompt
+
+
+```r
+library(babynames)
+summary(babynames)
+```
+
+How many rows and columns are there in the `babynames` dataset?
+
+What name is in row #12345?
+
+How many unique baby names are there?
+
+Make a new data frame with a random 1% of the original rows.
+
+How many 19th century rows are there?
+
+
+Exercise: Examining data frames
+========================================================
+type: prompt
+
+
+```r
+library(babynames)
+cat(nrow(babynames), ncol(babynames), babynames[12345, "name"])
+```
+
+```
+1792091 5 Baxter
+```
+
+```r
+s <- babynames[sample(1:nrow(babynames), 0.01 * nrow(babynames)),]
+nrow(subset(babynames, year < 1900))
+```
+
+```
+[1] 52265
+```
+
+
+
+
+Cleaning data
+========================================================
+
+Usually, the first thing you'd like to do after importing data is *clean* it.
+
+- change column types
+- computing on columns
+- splitting columns
+- combining columns
+- dealing with `NA` values
+
+
+Changing column types
+========================================================
+
+Often, the default classes assigned by `read.table` and its ilk aren't correct. You can change these--but first, make sure to understand *why* `read.table` did what it did.
+
+```r
+d$x <- as.numeric(d$x)
+d$y <- as.character(d$y)
+d$z <- as.Date(d$z)
+d$z <- as.factor(d$x)
+```
+
+
+Computing on columns
+========================================================
+
+This is usually trivial.
+
+```r
+d <- data.frame(x=1:3)
+d$y <- d$x * 2
+d$z <- ifelse(d$y == 4, "quatre", "pas quatre") 
+d
+```
+
+```
+  x y          z
+1 1 2 pas quatre
+2 2 4     quatre
+3 3 6 pas quatre
+```
+
+
+Combining columns
+========================================================
+
+Combining columns is generally easy.
+
+```r
+d <- data.frame(x=1:3, y=4:6)
+d$z <- with(d, paste("pasted", x, "and", y))  # note use of `with` here
+d
+```
+
+```
+  x y              z
+1 1 4 pasted 1 and 4
+2 2 5 pasted 2 and 5
+3 3 6 pasted 3 and 6
+```
+
+
+Splitting columns
+========================================================
+
+This is sometimes a bit trickier. Perfectly possible in base R, but since we'll be using the `reshape2` package later anyway, let's use `reshape2::colsplit`.
+
+```r
+d <- data.frame(x=paste("hi", 1:3))
+library(reshape2)
+split <- colsplit(d$x, " ", c("var1", "var2"))
+cbind(d, split)
+```
+
+```
+     x var1 var2
+1 hi 1   hi    1
+2 hi 2   hi    2
+3 hi 3   hi    3
+```
+
+
+Understanding and dealing with NA
+========================================================
+
+
+
+Dealing with dates
+========================================================
+
+R has a `Date` class representing calendar dates, and an `as.Date` function for converting to Dates. The `lubridate` package is often useful (and easier) for these cases:
+
+```r
+library(lubridate)
+x <- c("09-01-01", "09-01-02")
+ymd(x)   # there's also dmy and mdy!
+```
+
+```
+[1] "2009-01-01 UTC" "2009-01-02 UTC"
+```
+
+The `difftime` function is useful for computing time intervals.
+
+
+Reshaping data
 ========================================================
 type: section
 
@@ -515,7 +895,25 @@ type: section
 History lesson
 ========================================================
 
-<img src="images/history.png" width="900" />
+<img src="images/history.png" width="850" />
+
+
+Reshaping data
+========================================================
+
+Generlly this is **critical** step.
+
+- rbind, cbind, merge
+- long versus wide data - very important!
+
+
+Exercise: Reshaping data
+========================================================
+type: prompt
+incremental: true
+
+?
+
 
 
 Summarizing and operating on data
@@ -559,3 +957,18 @@ R also has many contributed *packages* across a wide variety of scientific field
 - [**Reproducible Research**](http://cran.r-project.org/web/views/ReproducibleResearch.html)
 - Spatial Statistics
 - Time Series
+
+Exercises (10 minutes each):
+Importing data
+Manipulating/subset/index
+Melt/cast
+Summarizing
+
+Gotcha list to include:
+stringsAsFactors
+When using a sequence as an index for iteration, it's better to use the seq_along() function rather than something like 1:length(x).
+1-based indexing
+List notation
+Partial matching in the $ operator: This applies to lists, but also on data.frame
+
+
