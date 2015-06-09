@@ -7,6 +7,8 @@ A JGCRI workshop covering reproducibility, tools, importing, manipulation and ag
 
 Three hours, 50% lecture and 50% working examples and problems.
 
+Feedback: <a href="mailto:bondlamberty@pnnl">Email</a>  [Twitter](https://twitter.com/BenBondLamberty)
+
 
 Focus of this workshop
 ========================================================
@@ -34,13 +36,13 @@ Is R the right tool for the job?
 ========================================================
 
 It might not be. R has limitations and weaknesses:
-- learning curve; quirks; inconsistent syntax
+- nontrivial learning curve; quirks; inconsistent syntax
 - documentation patchy and terse
 - package quality varies
 - generally operates in-memory only
 - not particularly fast
 
-Alternative to address some of these issues include C/C++ (speed), Python (intuitive, flexible, scalable), Julia (fast, expressive, arcane), Java (scalable), Hadoop (very large data).
+Alternatives to address some of these issues include C/C++ (speed), Python (intuitive, flexible, scalable), Julia (fast, expressive, arcane), Java (scalable), Hadoop (very large data).
 
 
 Things you should know
@@ -67,7 +69,7 @@ sum(x) # `sum` is a built-in function
 ```
 - How to get help: for example `?read.table`
 
-Things you should know: data
+Things you should know: data types
 ========================================================
 
 - The *boolean* (`TRUE`, `FALSE`) data type
@@ -75,19 +77,11 @@ Things you should know: data
 
 ```r
 v <- 1:5
-v
+cat(v, v*2)
 ```
 
 ```
-[1] 1 2 3 4 5
-```
-
-```r
-v*2
-```
-
-```
-[1]  2  4  6  8 10
+1 2 3 4 5 2 4 6 8 10
 ```
 
 ```r
@@ -99,7 +93,31 @@ c(sum(v), rev(v))  # concatenate
 ```
 
 
-Things you should know: data
+Things you should know: data types
+========================================================
+
+- The *factor* data type
+
+```r
+summary(letters)
+```
+
+```
+   Length     Class      Mode 
+       26 character character 
+```
+
+```r
+summary(as.factor(letters))
+```
+
+```
+a b c d e f g h i j k l m n o p q r s t u v w x y z 
+1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 
+```
+
+
+Things you should know: data frames
 ========================================================
 
 - The idea of a *data frame* (tightly coupled vectors)
@@ -120,7 +138,7 @@ head(cars)  # a built-in dataset
 Data frames are the fundamental (in the sense of most frequently used) data type in R.
 
 
-Things you should know: data
+Things you should know: data frames
 ========================================================
 
 - How to get information about a data frame
@@ -148,7 +166,7 @@ summary(cars)
 ```
 
 
-Things you should know: data
+Things you should know: data frames
 ========================================================
 
 - Basic data frame indexing
@@ -183,29 +201,6 @@ cars[3, "dist"]
 
 ```
 [1] 4
-```
-
-
-Things you should know: data
-========================================================
-
-- How to *list* and *remove* objects
-
-```r
-ls()
-```
-
-```
-[1] "v" "x"
-```
-
-```r
-rm(x)
-ls()
-```
-
-```
-[1] "v"
 ```
 
 
@@ -522,7 +517,7 @@ Data are at: http://stat405.had.co.nz/data/pew.txt
 
 
 ```r
-pew <- read.table(...)
+pew <- read.table(...) # or...?
 pew
 summary(pew)
 ```
@@ -550,7 +545,7 @@ The `read.table` family of functions can be slow and (generally) only read from 
 - `data.table::fread` reads text files extremely quickly, as does the new `readr` package
 - The `foreign` package provides import facilities for Stat, SAS, Minitab, etc.
 - Relational databases via ` RMySQL` and others
-- Many specialized packages (e.g. `ncdf4` for netCDF)
+- Many specialized packages (e.g. `ncdf4` for netCDF, `XML::readHTMLTable` for extracting tables from HTML)
 
 
 Cleaning data
@@ -561,10 +556,16 @@ type: section
 Examining data frames
 ========================================================
 
-In most cases, after you've imported your data, it's in a `data.frame`. What now? Generally we'd like to look at it in various ways. The *generic* function `summary` is useful:
+In most cases, after you've imported your data, it's in a `data.frame`. The `summary` and `str` functions are useful for at this point:
 
 ```r
-summary(cars)
+str(cars); summary(cars)
+```
+
+```
+'data.frame':	50 obs. of  2 variables:
+ $ speed: num  4 4 7 7 8 9 10 10 10 11 ...
+ $ dist : num  2 10 4 22 16 10 18 26 34 17 ...
 ```
 
 ```
@@ -576,7 +577,6 @@ summary(cars)
  3rd Qu.:19.0   3rd Qu.: 56.00  
  Max.   :25.0   Max.   :120.00  
 ```
-
 
 Examining data frames
 ========================================================
@@ -641,10 +641,10 @@ babynames[sample(nrow(babynames), 3), ]
 ```
 
 ```
-        year sex     name  n         prop
-1214971 1995   M   Jacory 28 1.392739e-05
-1210278 1995   F Breeyana  5 2.603111e-06
-753001  1973   M    Faron 51 3.159546e-05
+        year sex    name  n         prop
+569992  1959   M Darroll 15 6.924156e-06
+1385498 2001   M   Manas 14 6.774094e-06
+747165  1973   F Raynell 11 7.078671e-06
 ```
 This uses the extremely useful function `sample` to randomly sample from a vector.
 
@@ -831,7 +831,8 @@ cat(nrow(babynames), ncol(babynames), babynames[12345, "name"])
 
 ```r
 s <- babynames[sample(1:nrow(babynames), 0.01 * nrow(babynames)),]
-nrow(subset(babynames, year < 1900))
+
+sum(babynames$year < 1900) # better than nrow(subset(...))
 ```
 
 ```
@@ -890,20 +891,34 @@ R provides a set of high performance functions for many of these tasks: `cumsum`
 Computing on columns
 ========================================================
 
-...but not always. A rolling ('window') mean. TODO.
+...but not always. A rolling mean for window size *n*, for example.
 
-* for loop
-* filter
-* package solutions: zoo::...  dplyr:....
+* naive (slow) loop
+
+```r
+for(i in seq_along(x)) {
+  # calculate mean...
+```
+* `filter` (note its `sides` argument)
+
+```r
+stats::filter(x, rep(1/n, n), sides=2)
+```
+
+* package-specific solutions, e.g.
+
+```r
+zoo::rollmean(x, n, align='center')
+```
 
 
 Gotcha #2: sequences and for()
 ========================================================
 type: alert
 
-In the previous example, we used `seq_along(d)` instead of `1:nrow(d)`. Why?
+In the previous example, we used `seq_along(x)` instead of `1:length(x)` (or `nrow`). Why?
 
-Because if `d` has zero rows, we get undesirable behavior.
+Because if `d` has zero rows or elements...
 
 
 ```r
@@ -985,7 +1000,7 @@ For a data frame with 1,100,000 rows:
 
 ***
 
-![plot of chunk unnamed-chunk-43](R-data-workshop-figure/unnamed-chunk-43-1.png) 
+![plot of chunk unnamed-chunk-46](R-data-workshop-figure/unnamed-chunk-46-1.png) 
 
 
 Combining columns
@@ -1030,6 +1045,25 @@ cbind(d, split)
 Understanding and dealing with NA
 ========================================================
 
+One of R's real strengths is that missing values are a first-class data type: `NA`.
+
+
+```r
+x <- c(1, 2, 3, NA)
+is.na(x) # returns c(F, F, F, T)
+any(is.na(x)) # returns TRUE
+```
+
+Like `NaN` and `Inf`, usually `NA` 'poisons' operations, so must be handled.
+
+
+```r
+sum(x) # NA
+sum(x, na.rm=TRUE) # 6
+d <- data.frame(x)
+na.omit(d)  # remove rows with NA
+complete.cases(d)  # identify 'good' rows
+```
 
 
 Dealing with dates
@@ -1050,6 +1084,59 @@ ymd(x)   # there's also dmy and mdy!
 The `difftime` function is useful for computing time intervals.
 
 
+Quiz: Cleaning Data
+========================================================
+type: prompt
+incremental: true
+
+
+```r
+x <- -2:2
+y <- 4/x 
+y  # prints...?
+```
+
+```
+[1]  -2  -4 Inf   4   2
+```
+
+```r
+y <- y[is.finite(y)]
+y  # prints...?
+```
+
+```
+[1] -2 -4  4  2
+```
+
+***
+
+
+```r
+is.numeric(NA)
+```
+
+```
+[1] FALSE
+```
+
+```r
+is.numeric(Inf)
+```
+
+```
+[1] TRUE
+```
+
+```r
+is.infinite(Inf)
+```
+
+```
+[1] TRUE
+```
+
+
 Reshaping data
 ========================================================
 type: section
@@ -1064,10 +1151,60 @@ History lesson
 Reshaping data
 ========================================================
 
-Generlly this is **critical** step.
+We often need data in a particular form for working with it.
 
-- rbind, cbind, merge
-- long versus wide data - very important!
+If you're used to spreadsheets, it's more common to use data in *wide format*: a subject's repeated responses are in a single row.
+
+For data processing in R, *wide format* is almost always better: each row is one time point per subject.
+
+Variables are one of two types: `id` variables, which are typically assigned; and `measure` variables, which are measured (observations). But it's not always obvious
+- What is a variable?
+- What is a unit of observation?
+- Which data should go in each row?
+
+
+Reshaping the Pew data
+========================================================
+
+
+```r
+pew[1:5, 1:4]
+```
+
+```
+            religion <$10k $10-20k $20-30k
+1           Agnostic    27      34      60
+2            Atheist    12      27      37
+3           Buddhist    27      21      30
+4           Catholic   418     617     732
+5 Don’t know/refused    15      14      15
+```
+
+These data are *wide* - multiple observations per row.
+
+Which columns are *measure* variables, and which *id* variables?
+
+
+Reshaping the Pew data
+========================================================
+
+
+```r
+pew_long <- melt(pew, id.vars="religion")
+head(pew_long)
+```
+
+```
+            religion variable value
+1           Agnostic    <$10k    27
+2            Atheist    <$10k    12
+3           Buddhist    <$10k    27
+4           Catholic    <$10k   418
+5 Don’t know/refused    <$10k    15
+6   Evangelical Prot    <$10k   575
+```
+
+These data are now *long*.
 
 
 Exercise: Reshaping data
@@ -1159,3 +1296,18 @@ List notation
 Partial matching in the $ operator: This applies to lists, but also on data.frame
 
 
+
+Misc
+========================================================
+
+>To understand computations in R, two slogans are helpful:
+>- Everything that exists is an object.
+>- Everything that happens is a function call.
+
+(John Chambers.)
+
+
+
+>The best thing about R is that it was written by statisticians. The worst thing about R is that it was written by statisticians.
+
+(Bow Cowgill.)

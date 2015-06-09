@@ -7,6 +7,8 @@ A JGCRI workshop covering reproducibility, tools, importing, manipulation and ag
 
 Three hours, 50% lecture and 50% working examples and problems.
 
+Feedback: <a href="mailto:bondlamberty@pnnl">Email</a>  [Twitter](https://twitter.com/BenBondLamberty)
+
 
 Focus of this workshop
 ========================================================
@@ -34,13 +36,13 @@ Is R the right tool for the job?
 ========================================================
 
 It might not be. R has limitations and weaknesses:
-- learning curve; quirks; inconsistent syntax
+- nontrivial learning curve; quirks; inconsistent syntax
 - documentation patchy and terse
 - package quality varies
 - generally operates in-memory only
 - not particularly fast
 
-Alternative to address some of these issues include C/C++ (speed), Python (intuitive, flexible, scalable), Julia (fast, expressive, arcane), Java (scalable), Hadoop (very large data).
+Alternatives to address some of these issues include C/C++ (speed), Python (intuitive, flexible, scalable), Julia (fast, expressive, arcane), Java (scalable), Hadoop (very large data).
 
 
 Things you should know
@@ -62,20 +64,29 @@ sum(x) # `sum` is a built-in function
 ```
 - How to get help: for example `?read.table`
 
-Things you should know: data
+Things you should know: data types
 ========================================================
 
 - The *boolean* (`TRUE`, `FALSE`) data type
 - The *vector* data type
 ```{r}
 v <- 1:5
-v
-v*2
+cat(v, v*2)
 c(sum(v), rev(v))  # concatenate
 ```
 
 
-Things you should know: data
+Things you should know: data types
+========================================================
+
+- The *factor* data type
+```{r}
+summary(letters)
+summary(as.factor(letters))
+```
+
+
+Things you should know: data frames
 ========================================================
 
 - The idea of a *data frame* (tightly coupled vectors)
@@ -85,7 +96,7 @@ head(cars)  # a built-in dataset
 Data frames are the fundamental (in the sense of most frequently used) data type in R.
 
 
-Things you should know: data
+Things you should know: data frames
 ========================================================
 
 - How to get information about a data frame
@@ -95,7 +106,7 @@ summary(cars)
 ```
 
 
-Things you should know: data
+Things you should know: data frames
 ========================================================
 
 - Basic data frame indexing
@@ -109,17 +120,6 @@ cars[c(1, 3:4),]
 ```{r, echo=TRUE}
 # Rows and columns can be specified by number or name.
 cars[3, "dist"]
-```
-
-
-Things you should know: data
-========================================================
-
-- How to *list* and *remove* objects
-```{r, echo=TRUE}
-ls()
-rm(x)
-ls()
 ```
 
 
@@ -392,7 +392,7 @@ incremental: true
 Data are at: http://stat405.had.co.nz/data/pew.txt
 
 ```{r, eval=FALSE}
-pew <- read.table(...)
+pew <- read.table(...) # or...?
 pew
 summary(pew)
 ```
@@ -446,7 +446,7 @@ The `read.table` family of functions can be slow and (generally) only read from 
 - `data.table::fread` reads text files extremely quickly, as does the new `readr` package
 - The `foreign` package provides import facilities for Stat, SAS, Minitab, etc.
 - Relational databases via ` RMySQL` and others
-- Many specialized packages (e.g. `ncdf4` for netCDF)
+- Many specialized packages (e.g. `ncdf4` for netCDF, `XML::readHTMLTable` for extracting tables from HTML)
 
 
 Cleaning data
@@ -457,11 +457,10 @@ type: section
 Examining data frames
 ========================================================
 
-In most cases, after you've imported your data, it's in a `data.frame`. What now? Generally we'd like to look at it in various ways. The *generic* function `summary` is useful:
+In most cases, after you've imported your data, it's in a `data.frame`. The `summary` and `str` functions are useful for at this point:
 ```{r}
-summary(cars)
+str(cars); summary(cars)
 ```
-
 
 Examining data frames
 ========================================================
@@ -591,7 +590,8 @@ type: prompt
 library(babynames)
 cat(nrow(babynames), ncol(babynames), babynames[12345, "name"])
 s <- babynames[sample(1:nrow(babynames), 0.01 * nrow(babynames)),]
-nrow(subset(babynames, year < 1900))
+
+sum(babynames$year < 1900) # better than nrow(subset(...))
 ```
 
 
@@ -637,20 +637,31 @@ R provides a set of high performance functions for many of these tasks: `cumsum`
 Computing on columns
 ========================================================
 
-...but not always. A rolling ('window') mean. TODO.
+...but not always. A rolling mean for window size *n*, for example.
 
-* for loop
-* filter
-* package solutions: zoo::...  dplyr:....
+* naive (slow) loop
+```{r, eval=FALSE}
+for(i in seq_along(x)) {
+  # calculate mean...
+```
+* `filter` (note its `sides` argument)
+```{r, eval=FALSE}
+stats::filter(x, rep(1/n, n), sides=2)
+```
+
+* package-specific solutions, e.g.
+```{r, eval=FALSE}
+zoo::rollmean(x, n, align='center')
+```
 
 
 Gotcha #2: sequences and for()
 ========================================================
 type: alert
 
-In the previous example, we used `seq_along(d)` instead of `1:nrow(d)`. Why?
+In the previous example, we used `seq_along(x)` instead of `1:length(x)` (or `nrow`). Why?
 
-Because if `d` has zero rows, we get undesirable behavior.
+Because if `d` has zero rows or elements...
 
 ```{r}
 d <- data.frame()  # 0 rows
@@ -714,7 +725,7 @@ For a data frame with `r prettyNum(length(vnums), big.mark=",")` rows:
 
 ***
 
-```{r, echo=FALSE}
+```{r, cache=TRUE, echo=FALSE}
 slowtime <- system.time({
   samplenums <- rep(1, length(vnums))
 s <- 1
@@ -759,6 +770,23 @@ cbind(d, split)
 Understanding and dealing with NA
 ========================================================
 
+One of R's real strengths is that missing values are a first-class data type: `NA`.
+
+```{r, eval=FALSE}
+x <- c(1, 2, 3, NA)
+is.na(x) # returns c(F, F, F, T)
+any(is.na(x)) # returns TRUE
+```
+
+Like `NaN` and `Inf`, usually `NA` 'poisons' operations, so must be handled.
+
+```{r, eval=FALSE}
+sum(x) # NA
+sum(x, na.rm=TRUE) # 6
+d <- data.frame(x)
+na.omit(d)  # remove rows with NA
+complete.cases(d)  # identify 'good' rows
+```
 
 
 Dealing with dates
@@ -772,6 +800,28 @@ ymd(x)   # there's also dmy and mdy!
 ```
 
 The `difftime` function is useful for computing time intervals.
+
+
+Quiz: Cleaning Data
+========================================================
+type: prompt
+incremental: true
+
+```{r}
+x <- -2:2
+y <- 4/x 
+y  # prints...?
+y <- y[is.finite(y)]
+y  # prints...?
+```
+
+***
+
+```{r}
+is.numeric(NA)
+is.numeric(Inf)
+is.infinite(Inf)
+```
 
 
 Reshaping data
@@ -788,10 +838,39 @@ History lesson
 Reshaping data
 ========================================================
 
-Generlly this is **critical** step.
+We often need data in a particular form for working with it.
 
-- rbind, cbind, merge
-- long versus wide data - very important!
+If you're used to spreadsheets, it's more common to use data in *wide format*: a subject's repeated responses are in a single row.
+
+For data processing in R, *wide format* is almost always better: each row is one time point per subject.
+
+Variables are one of two types: `id` variables, which are typically assigned; and `measure` variables, which are measured (observations). But it's not always obvious
+- What is a variable?
+- What is a unit of observation?
+- Which data should go in each row?
+
+
+Reshaping the Pew data
+========================================================
+
+```{r}
+pew[1:5, 1:4]
+```
+
+These data are *wide* - multiple observations per row.
+
+Which columns are *measure* variables, and which *id* variables?
+
+
+Reshaping the Pew data
+========================================================
+
+```{r}
+pew_long <- melt(pew, id.vars="religion")
+head(pew_long)
+```
+
+These data are now *long*.
 
 
 Exercise: Reshaping data
@@ -883,3 +962,18 @@ List notation
 Partial matching in the $ operator: This applies to lists, but also on data.frame
 
 
+
+Misc
+========================================================
+
+>To understand computations in R, two slogans are helpful:
+>- Everything that exists is an object.
+>- Everything that happens is a function call.
+
+(John Chambers.)
+
+
+
+>The best thing about R is that it was written by statisticians. The worst thing about R is that it was written by statisticians.
+
+(Bow Cowgill.)

@@ -17,3 +17,5 @@ vignettes/*.pdf
 R-data-workshop-figure/
 R-data-workshop.md
 R-data-workshop-rpubs.html
+R-data-workshop-cache/
+
