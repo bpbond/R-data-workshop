@@ -203,6 +203,35 @@ cars[3, "dist"]
 [1] 4
 ```
 
+```r
+cars$dist[3]
+```
+
+```
+[1] 4
+```
+
+
+Gotcha #1: partial matching
+========================================================
+type: alert
+
+R has *partial matching* for the $ operator.
+
+
+```r
+d <- data.frame(xdsfjk=1:3)
+d$x
+```
+
+```
+[1] 1 2 3
+```
+
+In particular, you need to be careful using any `x`, or checking for `is.null(x)`, if another column exists whose name begins with the same pattern.
+
+This applies to both data frames and lists.
+
 
 Things you should know: control flow
 ========================================================
@@ -252,7 +281,7 @@ qplot(speed, dist, data=cars)
 
 ***
 
-![plot of chunk unnamed-chunk-10](R-data-workshop-figure/unnamed-chunk-10-1.png) 
+![plot of chunk unnamed-chunk-11](R-data-workshop-figure/unnamed-chunk-11-1.png) 
 
 
 Quiz: Basics
@@ -481,7 +510,7 @@ header=TRUE  | Look for a header giving column names
 check.names=TRUE | Check that column names are syntactically correct
 
 
-Gotcha #1: stringsAsFactors
+Gotcha #2: stringsAsFactors
 ========================================================
 type: alert
 
@@ -641,10 +670,10 @@ babynames[sample(nrow(babynames), 3), ]
 ```
 
 ```
-        year sex    name  n         prop
-569992  1959   M Darroll 15 6.924156e-06
-1385498 2001   M   Manas 14 6.774094e-06
-747165  1973   F Raynell 11 7.078671e-06
+        year sex      name  n         prop
+1450984 2003   M Tyquavion  7 3.334502e-06
+1747304 2012   M     Javan 50 2.475919e-05
+673911  1968   F Bernadett 12 7.020089e-06
 ```
 This uses the extremely useful function `sample` to randomly sample from a vector.
 
@@ -791,7 +820,7 @@ Examining data frames
 plot(cars$speed, cars$dist, main="We are NOT covering plotting!")
 ```
 
-![plot of chunk unnamed-chunk-33](R-data-workshop-figure/unnamed-chunk-33-1.png) 
+![plot of chunk unnamed-chunk-34](R-data-workshop-figure/unnamed-chunk-34-1.png) 
 
 
 Exercise: Examining data frames
@@ -912,7 +941,7 @@ zoo::rollmean(x, n, align='center')
 ```
 
 
-Gotcha #2: sequences and for()
+Gotcha #3: sequences and for()
 ========================================================
 type: alert
 
@@ -1000,7 +1029,7 @@ For a data frame with 1,100,000 rows:
 
 ***
 
-![plot of chunk unnamed-chunk-46](R-data-workshop-figure/unnamed-chunk-46-1.png) 
+![plot of chunk unnamed-chunk-47](R-data-workshop-figure/unnamed-chunk-47-1.png) 
 
 
 Combining columns
@@ -1287,13 +1316,6 @@ Importing data
 Manipulating/subset/index
 Melt/cast
 Summarizing
-
-Gotcha list to include:
-stringsAsFactors
-When using a sequence as an index for iteration, it's better to use the seq_along() function rather than something like 1:length(x).
-1-based indexing
-List notation
-Partial matching in the $ operator: This applies to lists, but also on data.frame
 
 
 

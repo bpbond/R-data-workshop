@@ -120,7 +120,24 @@ cars[c(1, 3:4),]
 ```{r, echo=TRUE}
 # Rows and columns can be specified by number or name.
 cars[3, "dist"]
+cars$dist[3]
 ```
+
+
+Gotcha #1: partial matching
+========================================================
+type: alert
+
+R has *partial matching* for the $ operator.
+
+```{r}
+d <- data.frame(xdsfjk=1:3)
+d$x
+```
+
+In particular, you need to be careful using any `x`, or checking for `is.null(x)`, if another column exists whose name begins with the same pattern.
+
+This applies to both data frames and lists.
 
 
 Things you should know: control flow
@@ -358,7 +375,7 @@ header=TRUE  | Look for a header giving column names
 check.names=TRUE | Check that column names are syntactically correct
 
 
-Gotcha #1: stringsAsFactors
+Gotcha #2: stringsAsFactors
 ========================================================
 type: alert
 
@@ -655,7 +672,7 @@ zoo::rollmean(x, n, align='center')
 ```
 
 
-Gotcha #2: sequences and for()
+Gotcha #3: sequences and for()
 ========================================================
 type: alert
 
@@ -953,13 +970,6 @@ Importing data
 Manipulating/subset/index
 Melt/cast
 Summarizing
-
-Gotcha list to include:
-stringsAsFactors
-When using a sequence as an index for iteration, it's better to use the seq_along() function rather than something like 1:length(x).
-1-based indexing
-List notation
-Partial matching in the $ operator: This applies to lists, but also on data.frame
 
 
 
