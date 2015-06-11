@@ -33,8 +33,8 @@ Focus of this workshop
 
 In a typical data pipline:
 - *Raw data* can come from many sources 
-- *Processing* includes cleaning, filtering, reshaping, modifying, QC
-- *Summarizing* includes applying functions, merging with ancillary data, computing group summaries
+- *Processing* - cleaning, modifying, reshaping, QC
+- *Summarizing* - merging with other data, groupwise summaries
 - *Products* include output data, plots, statistical analyses
 
 
@@ -112,6 +112,7 @@ Things you should know: data types
 
 - The *factor* data type
 ```{r}
+# 'letters' and 'LETTERS' are built-in
 summary(letters)
 summary(as.factor(letters))
 ```
@@ -607,8 +608,10 @@ cars_nodupes <- cars[-dupes, ]
 Examining data frames
 ========================================================
 
+We already used `ggplot2` to plot the `cars` dataset. Can also do this using base graphics:
+
 ```{r}
-plot(cars$speed, cars$dist, main="We are NOT covering plotting!")
+plot(cars$speed, cars$dist)
 ```
 
 
@@ -661,14 +664,15 @@ Usually, the first thing you'd like to do after importing data is *clean* it.
 Changing column types
 ========================================================
 
-Often, the default classes assigned by `read.table` and its ilk aren't correct. You can change these--but first, make sure to understand *why* `read.table` did what it did.
+Sometimes, the column classes assigned by `read.table` aren't correct. You can change these:
 ```{r, eval=FALSE}
 d$x <- as.numeric(d$x)
-d$y <- as.character(d$y)
 d$z <- as.Date(d$z)
-d$z <- as.factor(d$x)
 ```
-TODO
+But first, understand *why* `read.table` did what it did.If you think a column is numeric, but `read.table` converts it to character, that means it encountered a non-numeric entry. Investigate. 
+```{r, eval=FALSE}
+subset(d, is.na(as.numeric(x))) # examine NAs
+```
 
 
 Computing on columns
@@ -833,7 +837,7 @@ is.na(x) # returns c(F, F, F, T)
 any(is.na(x)) # returns TRUE
 ```
 
-Like `NaN` and `Inf`, usually `NA` 'poisons' operations, so must be handled.
+Like `NaN` and `Inf`, generally `NA` 'poisons' operations, so it must be handled.
 
 ```{r, eval=FALSE}
 sum(x) # NA

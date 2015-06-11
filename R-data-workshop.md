@@ -33,8 +33,8 @@ Focus of this workshop
 
 In a typical data pipline:
 - *Raw data* can come from many sources 
-- *Processing* includes cleaning, filtering, reshaping, modifying, QC
-- *Summarizing* includes applying functions, merging with ancillary data, computing group summaries
+- *Processing* - cleaning, modifying, reshaping, QC
+- *Summarizing* - merging with other data, groupwise summaries
 - *Products* include output data, plots, statistical analyses
 
 
@@ -126,6 +126,7 @@ Things you should know: data types
 - The *factor* data type
 
 ```r
+# 'letters' and 'LETTERS' are built-in
 summary(letters)
 ```
 
@@ -700,9 +701,9 @@ babynames[sample(nrow(babynames), 3), ]
 
 ```
         year sex    name  n         prop
-152332  1918   F Gladine  8 6.653570e-06
-351479  1938   F    Otis  9 7.886028e-06
-1762524 2013   F  Fannie 44 2.304624e-05
+574930  1960   F Sherrye 24 1.153905e-05
+635488  1965   F Kelleen 32 1.751291e-05
+1484153 2004   M  Shahan  6 2.841921e-06
 ```
 This uses the extremely useful function `sample` to randomly sample from a vector.
 
@@ -844,9 +845,11 @@ cars_nodupes <- cars[-dupes, ]
 Examining data frames
 ========================================================
 
+We already used `ggplot2` to plot the `cars` dataset. Can also do this using base graphics:
+
 
 ```r
-plot(cars$speed, cars$dist, main="We are NOT covering plotting!")
+plot(cars$speed, cars$dist)
 ```
 
 ![plot of chunk unnamed-chunk-34](R-data-workshop-figure/unnamed-chunk-34-1.png) 
@@ -914,15 +917,17 @@ Usually, the first thing you'd like to do after importing data is *clean* it.
 Changing column types
 ========================================================
 
-Often, the default classes assigned by `read.table` and its ilk aren't correct. You can change these--but first, make sure to understand *why* `read.table` did what it did.
+Sometimes, the column classes assigned by `read.table` aren't correct. You can change these:
 
 ```r
 d$x <- as.numeric(d$x)
-d$y <- as.character(d$y)
 d$z <- as.Date(d$z)
-d$z <- as.factor(d$x)
 ```
-TODO
+But first, understand *why* `read.table` did what it did.If you think a column is numeric, but `read.table` converts it to character, that means it encountered a non-numeric entry. Investigate. 
+
+```r
+subset(d, is.na(as.numeric(x))) # examine NAs
+```
 
 
 Computing on columns
@@ -1063,7 +1068,7 @@ In R, `for` loops are rarely the fastest way to do something (although they may 
 
 ***
 
-![plot of chunk unnamed-chunk-47](R-data-workshop-figure/unnamed-chunk-47-1.png) 
+![plot of chunk unnamed-chunk-48](R-data-workshop-figure/unnamed-chunk-48-1.png) 
 
 
 Combining columns
@@ -1117,7 +1122,7 @@ is.na(x) # returns c(F, F, F, T)
 any(is.na(x)) # returns TRUE
 ```
 
-Like `NaN` and `Inf`, usually `NA` 'poisons' operations, so must be handled.
+Like `NaN` and `Inf`, generally `NA` 'poisons' operations, so it must be handled.
 
 
 ```r
