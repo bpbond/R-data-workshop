@@ -10,6 +10,22 @@ Three hours, 50% lecture and 50% working examples and problems.
 Feedback: <a href="mailto:bondlamberty@pnnl">Email</a>  [Twitter](https://twitter.com/BenBondLamberty)
 
 
+Three hours of action & entertainment
+========================================================
+
+- Introduction and reproducibility (20 minutes)
+- Getting data into R (20 minutes)
+- Cleaning data (20 minutes)
+- Reshaping data (30 minutes)
+
+(break)
+
+- Summarizing data (45 minutes)
+- Robustness and performance (30 minutes)
+
+**Breadth more than depth**
+
+
 Focus of this workshop
 ========================================================
 
@@ -50,19 +66,34 @@ Things you should know
 type: section
 
 
+
 Things you should know: basics
 ========================================================
 
 This workshop assumes you understand the basics of using R:
 
-- What it is
-- How to start it
+- What R is
+- How to start and quit it
+- How to get help
+  + `?read.table`
+  + `help(package='dplyr')`
+
+
+Things you should know: basics
+========================================================
+
 - The idea of *objects*, *functions*, *assignment*, and *comments*
-```{r}
-x <- 10
-sum(x) # `sum` is a built-in function
+```{r, eval=FALSE}
+x <- 10 # `x` is an object
+sum(x) # `sum` is a function
 ```
-- How to get help: for example `?read.table`
+
+>To understand computations in R, two slogans are helpful:
+>- Everything that exists is an object.
+>- Everything that happens is a function call.
+>
+>(John Chambers)
+
 
 Things you should know: data types
 ========================================================
@@ -70,9 +101,9 @@ Things you should know: data types
 - The *boolean* (`TRUE`, `FALSE`) data type
 - The *vector* data type
 ```{r}
-v <- 1:5
+v <- 1:5 + 1
 cat(v, v*2)
-c(sum(v), rev(v))  # concatenate
+v[c(2, 5)]
 ```
 
 
@@ -341,11 +372,10 @@ If you're doing the exercises and problems, you should have installed these
 packages beforehand:
 - `dplyr` - fast, flexible tool for working with data frames
 - `plyr` - tools for splitting, applying and combining data
-- `reshape2` and `tidyr` - reshaping and tidying data
+- `reshape2` - reshaping data
 
-We'll also use these *data packages*:
-- `babynames` - names provide to the SSA 1880-2013
-- `nycflights13` - 336,776 flights that departed NYC in 2013
+(These are part of what's known as the HadleyVerse.) We'll also use this *data package*:
+- `babynames` - names provided to the SSA 1880-2013
 
 These can all be installed using R's `install.packages` command.
 
@@ -355,7 +385,9 @@ Getting data into R
 
 By far the most common way to bring data into R is via the `read.table` family of functions. In particular, `read.csv` reads a comma separated value file.
 ```{r, eval=FALSE}
-d <- read.table("mydata.csv", sep=",", header=TRUE)
+d <- read.table("mydata.csv", 
+                sep=",", 
+                header=TRUE)
 d <- read.csv("mydata.csv") # same thing
 ```
 
@@ -381,11 +413,12 @@ type: alert
 
 The behavior of `read.table` leads to an **extremely common** bug for beginners in R.
 
-By default, `read.table` changes strings to `factors`: a number encoding categories (e.g. 0, 1, 2 instead of "Apple", "Banana", "Grape"). This can lead to hard-to-diagnose problems later if you're not expecting it.
+By default, `read.table` changes strings to `factors`: a number encoding categories (e.g. 0, 1, 2 instead of "Apple", "Banana", "Grape"). This can lead to hard-to-diagnose problems later (for example, when merging data) if you're not expecting it.
 
 The solution:
 ```{r, eval=FALSE}
-d <- read.csv("mydata.csv", stringsAsFactors=FALSE)
+d <- read.csv("mydata.csv",
+              stringsAsFactors=FALSE)
 ```
 
 
@@ -458,7 +491,7 @@ pew <- structure(list(religion = c("Agnostic", "Atheist", "Buddhist",
 Alternatives for getting data into R
 ========================================================
 
-The `read.table` family of functions can be slow and (generally) only read from flat text files. But there are *many* other options.
+The `read.table` family of functions can be slow and (generally) only reads from flat text files. But there are *many* other options.
 - A number of packages read Excel files directly. In particular the new `readxl` is fast, stable, and flexible
 - `data.table::fread` reads text files extremely quickly, as does the new `readr` package
 - The `foreign` package provides import facilities for Stat, SAS, Minitab, etc.
@@ -602,6 +635,7 @@ How many 19th century rows are there?
 Exercise: Examining data frames
 ========================================================
 type: prompt
+incremental: true
 
 ```{r}
 library(babynames)
@@ -634,6 +668,7 @@ d$y <- as.character(d$y)
 d$z <- as.Date(d$z)
 d$z <- as.factor(d$x)
 ```
+TODO
 
 
 Computing on columns
@@ -663,7 +698,7 @@ for(i in seq_along(x)) {
 ```
 * `filter` (note its `sides` argument)
 ```{r, eval=FALSE}
-stats::filter(x, rep(1/n, n), sides=2)
+filter(x, rep(1/n, n), sides=2)
 ```
 
 * package-specific solutions, e.g.
@@ -675,6 +710,7 @@ zoo::rollmean(x, n, align='center')
 Gotcha #3: sequences and for()
 ========================================================
 type: alert
+incremental: true
 
 In the previous example, we used `seq_along(x)` instead of `1:length(x)` (or `nrow`). Why?
 
@@ -739,6 +775,8 @@ vnums <- rep(c(1, 2, 2, 3, 3, 3, 1, 1, 2, 3, 3), 100000)
 This has big consequences!
 
 For a data frame with `r prettyNum(length(vnums), big.mark=",")` rows:
+
+In R, `for` loops are rarely the fastest way to do something (although they may be the clearest).
 
 ***
 
@@ -859,7 +897,7 @@ We often need data in a particular form for working with it.
 
 If you're used to spreadsheets, it's more common to use data in *wide format*: a subject's repeated responses are in a single row.
 
-For data processing in R, *wide format* is almost always better: each row is one time point per subject.
+For data processing in R, *long format* is almost always better: each row is one time point per subject.
 
 Variables are one of two types: `id` variables, which are typically assigned; and `measure` variables, which are measured (observations). But it's not always obvious
 - What is a variable?
@@ -883,11 +921,92 @@ Reshaping the Pew data
 ========================================================
 
 ```{r}
+library(reshape2)
 pew_long <- melt(pew, id.vars="religion")
 head(pew_long)
 ```
 
 These data are now *long*.
+
+(I.e., `melt` has transformed them into 'molten' data.)
+
+
+Reshaping the Pew data
+========================================================
+
+Once our data are *long*, we can cast into another form:
+
+```{r}
+pew_original <- dcast(pew_long, 
+                      religion ~ variable)
+all.equal(pew_original, pew)
+```
+
+We've just transformed it back into its orignial form!
+
+```{r, echo=FALSE}
+print(pew[1:5, 1:4], row.names=FALSE)
+```
+
+
+Reshaping the Pew data
+========================================================
+
+Casting in the `reshape2` package can also involve data summarizing.
+
+```{r}
+dcast(pew_long, religion ~ .)
+```
+
+
+Reshaping the Pew data
+========================================================
+
+The aggregation function defaults to `length` but we can supply our own, as well as supply a value to use for missing combinations.
+
+```{r}
+reshape2::dcast(pew_long, religion ~ ., 
+                fun.aggregate=mean)
+```
+
+
+Reshaping the Pew data
+========================================================
+
+Can have more than one `id` variable in your rows or columns.
+
+```{r}
+dcast(pew_long, religion + variable ~ ., mean)
+```
+
+
+Exercise: Reshaping data
+========================================================
+type: prompt
+
+The built-in (and very famous) `iris` dataset gives the measurements (in cm) of the variables sepal length and width and petal length and width, respectively, for 50 flowers from each of 3 species of iris. The species are *Iris setosa*, *versicolor*, and *virginica*.
+
+```{r, echo=FALSE}
+iris[1:5, 2:5]
+```
+
+`iris` has `r nrow(iris)` rows and `r ncol(iris)` columns and is *wide*. Why?
+
+
+Exercise: Reshaping data
+========================================================
+type: prompt
+
+Use the `reshape2` package's `melt`, `colsplit`, `dcast` functions to make this nice summary table:
+```{r, echo=FALSE}
+iris_long <- melt(iris)
+newcols <- colsplit(iris_long$variable, "\\.", names=c("PlantPart","Dimension"))
+iris_long <- cbind(iris_long, newcols)
+iris_wide <- dcast(iris_long, Species + PlantPart ~ Dimension, fun.aggregate = mean)
+iris_wide
+```
+
+There is a tricky step when you use `colsplit`...
 
 
 Exercise: Reshaping data
@@ -895,8 +1014,37 @@ Exercise: Reshaping data
 type: prompt
 incremental: true
 
-?
+Steps:
 
+1. Think: what's the `id` variable(s)? What are the measured variable(s)?
+2. Melt the `iris` data to long form.
+3. Create new columns `PlantPart` and `Dimensions` by splitting apart the column containing "Sepal.length", etc.
+4. Join these columns to the long data.
+5. A single `dcast` call will create the summary table.
+
+**The trick**: in step #3, you'll need to use `pattern="\\."`
+
+
+Exercise: Reshaping data
+========================================================
+type: prompt
+
+```{r, eval=FALSE}
+# Step 2
+# Notice that melt guesses the id var correctly
+iris_long <- melt(iris)  
+
+# Step 3
+newcols <- colsplit(iris_long$variable, 
+                    pattern="\\.", 
+                    names=c("PlantPart","Dimension"))
+
+# Step 4
+iris_long <- cbind(iris_long, newcols)
+
+# Step 5
+dcast(iris_long, Species + PlantPart ~ Dimension, fun.aggregate = mean)
+```
 
 
 Summarizing and operating on data
@@ -976,13 +1124,10 @@ Summarizing
 Misc
 ========================================================
 
->To understand computations in R, two slogans are helpful:
->- Everything that exists is an object.
->- Everything that happens is a function call.
+- `nycflights13` - 336,776 flights that departed NYC in 2013
 
-(John Chambers.)
-
-
+plyr in one slide - 
+dplyr
 
 >The best thing about R is that it was written by statisticians. The worst thing about R is that it was written by statisticians.
 

@@ -10,6 +10,22 @@ Three hours, 50% lecture and 50% working examples and problems.
 Feedback: <a href="mailto:bondlamberty@pnnl">Email</a>  [Twitter](https://twitter.com/BenBondLamberty)
 
 
+Three hours of action & entertainment
+========================================================
+
+- Introduction and reproducibility (20 minutes)
+- Getting data into R (20 minutes)
+- Cleaning data (20 minutes)
+- Reshaping data (30 minutes)
+
+(break)
+
+- Summarizing data (45 minutes)
+- Robustness and performance (30 minutes)
+
+**Breadth more than depth**
+
+
 Focus of this workshop
 ========================================================
 
@@ -50,24 +66,35 @@ Things you should know
 type: section
 
 
+
 Things you should know: basics
 ========================================================
 
 This workshop assumes you understand the basics of using R:
 
-- What it is
-- How to start it
+- What R is
+- How to start and quit it
+- How to get help
+  + `?read.table`
+  + `help(package='dplyr')`
+
+
+Things you should know: basics
+========================================================
+
 - The idea of *objects*, *functions*, *assignment*, and *comments*
 
 ```r
-x <- 10
-sum(x) # `sum` is a built-in function
+x <- 10 # `x` is an object
+sum(x) # `sum` is a function
 ```
 
-```
-[1] 10
-```
-- How to get help: for example `?read.table`
+>To understand computations in R, two slogans are helpful:
+>- Everything that exists is an object.
+>- Everything that happens is a function call.
+>
+>(John Chambers)
+
 
 Things you should know: data types
 ========================================================
@@ -76,20 +103,20 @@ Things you should know: data types
 - The *vector* data type
 
 ```r
-v <- 1:5
+v <- 1:5 + 1
 cat(v, v*2)
 ```
 
 ```
-1 2 3 4 5 2 4 6 8 10
+2 3 4 5 6 4 6 8 10 12
 ```
 
 ```r
-c(sum(v), rev(v))  # concatenate
+v[c(2, 5)]
 ```
 
 ```
-[1] 15  5  4  3  2  1
+[1] 3 6
 ```
 
 
@@ -475,11 +502,10 @@ If you're doing the exercises and problems, you should have installed these
 packages beforehand:
 - `dplyr` - fast, flexible tool for working with data frames
 - `plyr` - tools for splitting, applying and combining data
-- `reshape2` and `tidyr` - reshaping and tidying data
+- `reshape2` - reshaping data
 
-We'll also use these *data packages*:
-- `babynames` - names provide to the SSA 1880-2013
-- `nycflights13` - 336,776 flights that departed NYC in 2013
+(These are part of what's known as the HadleyVerse.) We'll also use this *data package*:
+- `babynames` - names provided to the SSA 1880-2013
 
 These can all be installed using R's `install.packages` command.
 
@@ -490,7 +516,9 @@ Getting data into R
 By far the most common way to bring data into R is via the `read.table` family of functions. In particular, `read.csv` reads a comma separated value file.
 
 ```r
-d <- read.table("mydata.csv", sep=",", header=TRUE)
+d <- read.table("mydata.csv", 
+                sep=",", 
+                header=TRUE)
 d <- read.csv("mydata.csv") # same thing
 ```
 
@@ -516,12 +544,13 @@ type: alert
 
 The behavior of `read.table` leads to an **extremely common** bug for beginners in R.
 
-By default, `read.table` changes strings to `factors`: a number encoding categories (e.g. 0, 1, 2 instead of "Apple", "Banana", "Grape"). This can lead to hard-to-diagnose problems later if you're not expecting it.
+By default, `read.table` changes strings to `factors`: a number encoding categories (e.g. 0, 1, 2 instead of "Apple", "Banana", "Grape"). This can lead to hard-to-diagnose problems later (for example, when merging data) if you're not expecting it.
 
 The solution:
 
 ```r
-d <- read.csv("mydata.csv", stringsAsFactors=FALSE)
+d <- read.csv("mydata.csv",
+              stringsAsFactors=FALSE)
 ```
 
 
@@ -569,7 +598,7 @@ pew <- read.table(
 Alternatives for getting data into R
 ========================================================
 
-The `read.table` family of functions can be slow and (generally) only read from flat text files. But there are *many* other options.
+The `read.table` family of functions can be slow and (generally) only reads from flat text files. But there are *many* other options.
 - A number of packages read Excel files directly. In particular the new `readxl` is fast, stable, and flexible
 - `data.table::fread` reads text files extremely quickly, as does the new `readr` package
 - The `foreign` package provides import facilities for Stat, SAS, Minitab, etc.
@@ -670,10 +699,10 @@ babynames[sample(nrow(babynames), 3), ]
 ```
 
 ```
-        year sex      name  n         prop
-1450984 2003   M Tyquavion  7 3.334502e-06
-1747304 2012   M     Javan 50 2.475919e-05
-673911  1968   F Bernadett 12 7.020089e-06
+        year sex    name  n         prop
+152332  1918   F Gladine  8 6.653570e-06
+351479  1938   F    Otis  9 7.886028e-06
+1762524 2013   F  Fannie 44 2.304624e-05
 ```
 This uses the extremely useful function `sample` to randomly sample from a vector.
 
@@ -847,6 +876,7 @@ How many 19th century rows are there?
 Exercise: Examining data frames
 ========================================================
 type: prompt
+incremental: true
 
 
 ```r
@@ -892,6 +922,7 @@ d$y <- as.character(d$y)
 d$z <- as.Date(d$z)
 d$z <- as.factor(d$x)
 ```
+TODO
 
 
 Computing on columns
@@ -931,7 +962,7 @@ for(i in seq_along(x)) {
 * `filter` (note its `sides` argument)
 
 ```r
-stats::filter(x, rep(1/n, n), sides=2)
+filter(x, rep(1/n, n), sides=2)
 ```
 
 * package-specific solutions, e.g.
@@ -944,6 +975,7 @@ zoo::rollmean(x, n, align='center')
 Gotcha #3: sequences and for()
 ========================================================
 type: alert
+incremental: true
 
 In the previous example, we used `seq_along(x)` instead of `1:length(x)` (or `nrow`). Why?
 
@@ -1026,6 +1058,8 @@ type: prompt
 This has big consequences!
 
 For a data frame with 1,100,000 rows:
+
+In R, `for` loops are rarely the fastest way to do something (although they may be the clearest).
 
 ***
 
@@ -1184,7 +1218,7 @@ We often need data in a particular form for working with it.
 
 If you're used to spreadsheets, it's more common to use data in *wide format*: a subject's repeated responses are in a single row.
 
-For data processing in R, *wide format* is almost always better: each row is one time point per subject.
+For data processing in R, *long format* is almost always better: each row is one time point per subject.
 
 Variables are one of two types: `id` variables, which are typically assigned; and `measure` variables, which are measured (observations). But it's not always obvious
 - What is a variable?
@@ -1219,6 +1253,7 @@ Reshaping the Pew data
 
 
 ```r
+library(reshape2)
 pew_long <- melt(pew, id.vars="religion")
 head(pew_long)
 ```
@@ -1235,14 +1270,375 @@ head(pew_long)
 
 These data are now *long*.
 
+(I.e., `melt` has transformed them into 'molten' data.)
+
+
+Reshaping the Pew data
+========================================================
+
+Once our data are *long*, we can cast into another form:
+
+
+```r
+pew_original <- dcast(pew_long, 
+                      religion ~ variable)
+all.equal(pew_original, pew)
+```
+
+```
+[1] TRUE
+```
+
+We've just transformed it back into its orignial form!
+
+
+```
+           religion <$10k $10-20k $20-30k
+           Agnostic    27      34      60
+            Atheist    12      27      37
+           Buddhist    27      21      30
+           Catholic   418     617     732
+ Don’t know/refused    15      14      15
+```
+
+
+Reshaping the Pew data
+========================================================
+
+Casting in the `reshape2` package can also involve data summarizing.
+
+
+```r
+dcast(pew_long, religion ~ .)
+```
+
+```
+                  religion  .
+1                 Agnostic 10
+2                  Atheist 10
+3                 Buddhist 10
+4                 Catholic 10
+5       Don’t know/refused 10
+6         Evangelical Prot 10
+7                    Hindu 10
+8  Historically Black Prot 10
+9        Jehovah's Witness 10
+10                  Jewish 10
+11           Mainline Prot 10
+12                  Mormon 10
+13                  Muslim 10
+14                Orthodox 10
+15         Other Christian 10
+16            Other Faiths 10
+17   Other World Religions 10
+18            Unaffiliated 10
+```
+
+
+Reshaping the Pew data
+========================================================
+
+The aggregation function defaults to `length` but we can supply our own, as well as supply a value to use for missing combinations.
+
+
+```r
+reshape2::dcast(pew_long, religion ~ ., 
+                fun.aggregate=mean)
+```
+
+```
+                  religion     .
+1                 Agnostic  82.6
+2                  Atheist  51.5
+3                 Buddhist  41.1
+4                 Catholic 805.4
+5       Don’t know/refused  27.2
+6         Evangelical Prot 947.2
+7                    Hindu  25.7
+8  Historically Black Prot 199.5
+9        Jehovah's Witness  21.5
+10                  Jewish  68.2
+11           Mainline Prot 747.0
+12                  Mormon  58.1
+13                  Muslim  11.6
+14                Orthodox  36.3
+15         Other Christian  12.9
+16            Other Faiths  44.9
+17   Other World Religions   4.2
+18            Unaffiliated 370.7
+```
+
+
+Reshaping the Pew data
+========================================================
+
+Can have more than one `id` variable in your rows or columns.
+
+
+```r
+dcast(pew_long, religion + variable ~ ., mean)
+```
+
+```
+                   religion           variable    .
+1                  Agnostic              <$10k   27
+2                  Agnostic            $10-20k   34
+3                  Agnostic            $20-30k   60
+4                  Agnostic            $30-40k   81
+5                  Agnostic            $40-50k   76
+6                  Agnostic            $50-75k  137
+7                  Agnostic           $75-100k  122
+8                  Agnostic          $100-150k  109
+9                  Agnostic              >150k   84
+10                 Agnostic Don't know/refused   96
+11                  Atheist              <$10k   12
+12                  Atheist            $10-20k   27
+13                  Atheist            $20-30k   37
+14                  Atheist            $30-40k   52
+15                  Atheist            $40-50k   35
+16                  Atheist            $50-75k   70
+17                  Atheist           $75-100k   73
+18                  Atheist          $100-150k   59
+19                  Atheist              >150k   74
+20                  Atheist Don't know/refused   76
+21                 Buddhist              <$10k   27
+22                 Buddhist            $10-20k   21
+23                 Buddhist            $20-30k   30
+24                 Buddhist            $30-40k   34
+25                 Buddhist            $40-50k   33
+26                 Buddhist            $50-75k   58
+27                 Buddhist           $75-100k   62
+28                 Buddhist          $100-150k   39
+29                 Buddhist              >150k   53
+30                 Buddhist Don't know/refused   54
+31                 Catholic              <$10k  418
+32                 Catholic            $10-20k  617
+33                 Catholic            $20-30k  732
+34                 Catholic            $30-40k  670
+35                 Catholic            $40-50k  638
+36                 Catholic            $50-75k 1116
+37                 Catholic           $75-100k  949
+38                 Catholic          $100-150k  792
+39                 Catholic              >150k  633
+40                 Catholic Don't know/refused 1489
+41       Don’t know/refused              <$10k   15
+42       Don’t know/refused            $10-20k   14
+43       Don’t know/refused            $20-30k   15
+44       Don’t know/refused            $30-40k   11
+45       Don’t know/refused            $40-50k   10
+46       Don’t know/refused            $50-75k   35
+47       Don’t know/refused           $75-100k   21
+48       Don’t know/refused          $100-150k   17
+49       Don’t know/refused              >150k   18
+50       Don’t know/refused Don't know/refused  116
+51         Evangelical Prot              <$10k  575
+52         Evangelical Prot            $10-20k  869
+53         Evangelical Prot            $20-30k 1064
+54         Evangelical Prot            $30-40k  982
+55         Evangelical Prot            $40-50k  881
+56         Evangelical Prot            $50-75k 1486
+57         Evangelical Prot           $75-100k  949
+58         Evangelical Prot          $100-150k  723
+59         Evangelical Prot              >150k  414
+60         Evangelical Prot Don't know/refused 1529
+61                    Hindu              <$10k    1
+62                    Hindu            $10-20k    9
+63                    Hindu            $20-30k    7
+64                    Hindu            $30-40k    9
+65                    Hindu            $40-50k   11
+66                    Hindu            $50-75k   34
+67                    Hindu           $75-100k   47
+68                    Hindu          $100-150k   48
+69                    Hindu              >150k   54
+70                    Hindu Don't know/refused   37
+71  Historically Black Prot              <$10k  228
+72  Historically Black Prot            $10-20k  244
+73  Historically Black Prot            $20-30k  236
+74  Historically Black Prot            $30-40k  238
+75  Historically Black Prot            $40-50k  197
+76  Historically Black Prot            $50-75k  223
+77  Historically Black Prot           $75-100k  131
+78  Historically Black Prot          $100-150k   81
+79  Historically Black Prot              >150k   78
+80  Historically Black Prot Don't know/refused  339
+81        Jehovah's Witness              <$10k   20
+82        Jehovah's Witness            $10-20k   27
+83        Jehovah's Witness            $20-30k   24
+84        Jehovah's Witness            $30-40k   24
+85        Jehovah's Witness            $40-50k   21
+86        Jehovah's Witness            $50-75k   30
+87        Jehovah's Witness           $75-100k   15
+88        Jehovah's Witness          $100-150k   11
+89        Jehovah's Witness              >150k    6
+90        Jehovah's Witness Don't know/refused   37
+91                   Jewish              <$10k   19
+92                   Jewish            $10-20k   19
+93                   Jewish            $20-30k   25
+94                   Jewish            $30-40k   25
+95                   Jewish            $40-50k   30
+96                   Jewish            $50-75k   95
+97                   Jewish           $75-100k   69
+98                   Jewish          $100-150k   87
+99                   Jewish              >150k  151
+100                  Jewish Don't know/refused  162
+101           Mainline Prot              <$10k  289
+102           Mainline Prot            $10-20k  495
+103           Mainline Prot            $20-30k  619
+104           Mainline Prot            $30-40k  655
+105           Mainline Prot            $40-50k  651
+106           Mainline Prot            $50-75k 1107
+107           Mainline Prot           $75-100k  939
+108           Mainline Prot          $100-150k  753
+109           Mainline Prot              >150k  634
+110           Mainline Prot Don't know/refused 1328
+111                  Mormon              <$10k   29
+112                  Mormon            $10-20k   40
+113                  Mormon            $20-30k   48
+114                  Mormon            $30-40k   51
+115                  Mormon            $40-50k   56
+116                  Mormon            $50-75k  112
+117                  Mormon           $75-100k   85
+118                  Mormon          $100-150k   49
+119                  Mormon              >150k   42
+120                  Mormon Don't know/refused   69
+121                  Muslim              <$10k    6
+122                  Muslim            $10-20k    7
+123                  Muslim            $20-30k    9
+124                  Muslim            $30-40k   10
+125                  Muslim            $40-50k    9
+126                  Muslim            $50-75k   23
+127                  Muslim           $75-100k   16
+128                  Muslim          $100-150k    8
+129                  Muslim              >150k    6
+130                  Muslim Don't know/refused   22
+131                Orthodox              <$10k   13
+132                Orthodox            $10-20k   17
+133                Orthodox            $20-30k   23
+134                Orthodox            $30-40k   32
+135                Orthodox            $40-50k   32
+136                Orthodox            $50-75k   47
+137                Orthodox           $75-100k   38
+138                Orthodox          $100-150k   42
+139                Orthodox              >150k   46
+140                Orthodox Don't know/refused   73
+141         Other Christian              <$10k    9
+142         Other Christian            $10-20k    7
+143         Other Christian            $20-30k   11
+144         Other Christian            $30-40k   13
+145         Other Christian            $40-50k   13
+146         Other Christian            $50-75k   14
+147         Other Christian           $75-100k   18
+148         Other Christian          $100-150k   14
+149         Other Christian              >150k   12
+150         Other Christian Don't know/refused   18
+151            Other Faiths              <$10k   20
+152            Other Faiths            $10-20k   33
+153            Other Faiths            $20-30k   40
+154            Other Faiths            $30-40k   46
+155            Other Faiths            $40-50k   49
+156            Other Faiths            $50-75k   63
+157            Other Faiths           $75-100k   46
+158            Other Faiths          $100-150k   40
+159            Other Faiths              >150k   41
+160            Other Faiths Don't know/refused   71
+161   Other World Religions              <$10k    5
+162   Other World Religions            $10-20k    2
+163   Other World Religions            $20-30k    3
+164   Other World Religions            $30-40k    4
+165   Other World Religions            $40-50k    2
+166   Other World Religions            $50-75k    7
+167   Other World Religions           $75-100k    3
+168   Other World Religions          $100-150k    4
+169   Other World Religions              >150k    4
+170   Other World Religions Don't know/refused    8
+171            Unaffiliated              <$10k  217
+172            Unaffiliated            $10-20k  299
+173            Unaffiliated            $20-30k  374
+174            Unaffiliated            $30-40k  365
+175            Unaffiliated            $40-50k  341
+176            Unaffiliated            $50-75k  528
+177            Unaffiliated           $75-100k  407
+178            Unaffiliated          $100-150k  321
+179            Unaffiliated              >150k  258
+180            Unaffiliated Don't know/refused  597
+```
+
+
+Exercise: Reshaping data
+========================================================
+type: prompt
+
+The built-in (and very famous) `iris` dataset gives the measurements (in cm) of the variables sepal length and width and petal length and width, respectively, for 50 flowers from each of 3 species of iris. The species are *Iris setosa*, *versicolor*, and *virginica*.
+
+
+```
+  Sepal.Width Petal.Length Petal.Width Species
+1         3.5          1.4         0.2  setosa
+2         3.0          1.4         0.2  setosa
+3         3.2          1.3         0.2  setosa
+4         3.1          1.5         0.2  setosa
+5         3.6          1.4         0.2  setosa
+```
+
+`iris` has 150 rows and 5 columns and is *wide*. Why?
+
+
+Exercise: Reshaping data
+========================================================
+type: prompt
+
+Use the `reshape2` package's `melt`, `colsplit`, `dcast` functions to make this nice summary table:
+
+```
+     Species PlantPart Length Width
+1     setosa     Petal  1.462 0.246
+2     setosa     Sepal  5.006 3.428
+3 versicolor     Petal  4.260 1.326
+4 versicolor     Sepal  5.936 2.770
+5  virginica     Petal  5.552 2.026
+6  virginica     Sepal  6.588 2.974
+```
+
+There is a tricky step when you use `colsplit`...
+
 
 Exercise: Reshaping data
 ========================================================
 type: prompt
 incremental: true
 
-?
+Steps:
 
+1. Think: what's the `id` variable(s)? What are the measured variable(s)?
+2. Melt the `iris` data to long form.
+3. Create new columns `PlantPart` and `Dimensions` by splitting apart the column containing "Sepal.length", etc.
+4. Join these columns to the long data.
+5. A single `dcast` call will create the summary table.
+
+**The trick**: in step #3, you'll need to use `pattern="\\."`
+
+
+Exercise: Reshaping data
+========================================================
+type: prompt
+
+
+```r
+# Step 2
+# Notice that melt guesses the id var correctly
+iris_long <- melt(iris)  
+
+# Step 3
+newcols <- colsplit(iris_long$variable, 
+                    pattern="\\.", 
+                    names=c("PlantPart","Dimension"))
+
+# Step 4
+iris_long <- cbind(iris_long, newcols)
+
+# Step 5
+dcast(iris_long, Species + PlantPart ~ Dimension, fun.aggregate = mean)
+```
 
 
 Summarizing and operating on data
@@ -1322,13 +1718,10 @@ Summarizing
 Misc
 ========================================================
 
->To understand computations in R, two slogans are helpful:
->- Everything that exists is an object.
->- Everything that happens is a function call.
+- `nycflights13` - 336,776 flights that departed NYC in 2013
 
-(John Chambers.)
-
-
+plyr in one slide - 
+dplyr
 
 >The best thing about R is that it was written by statisticians. The worst thing about R is that it was written by statisticians.
 
