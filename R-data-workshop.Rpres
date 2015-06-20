@@ -21,7 +21,7 @@ Three hours of action & entertainment
 (break)
 
 - Summarizing data (45 minutes)
-- Robustness and performance (30 minutes)
+- Robustness and speed (30 minutes)
 
 **Breadth more than depth**
 
@@ -75,8 +75,8 @@ This workshop assumes you understand the basics of using R:
 - What R is
 - How to start and quit it
 - How to get help
-  + `?read.table`
-  + `help(package='dplyr')`
++ `?read.table`
++ `help(package='dplyr')`
 
 
 Things you should know: basics
@@ -255,10 +255,10 @@ You can't reproduce
 ========================================================
 ...what doesn't exist.
 - Gozilla ate my computer
-    + backup
-    + ideally *continuous*
++ backup
++ ideally *continuous*
 - Godzilla ate my office
-    + cloud
++ cloud
 
 ***
 
@@ -270,9 +270,9 @@ You can't reproduce
 
 ...what you've lost. What if you need access to a file as it existed 1, 10, or 100, or 1000 days ago?
 - Incremental backups
-    - minimum
+- minimum
 - Version control
-    - better
+- better
 
 ***
 
@@ -352,14 +352,14 @@ Reproducible research example
 ========================================================
 
 - Sequentially numbered R scripts
-    + (0-download.R, 1-process_data.R, ...)
++ (0-download.R, 1-process_data.R, ...)
 - Each script depends on the previous one
 - Each has a discrete, logical function
 - Each produces a *log file*
-    + including date/time, what R version, etc.
++ including date/time, what R version, etc.
 - This analytical chain starts with raw data
 - ...and ends with figures and tables for ms
-    + *or the ms itself!*
++ *or the ms itself!*
 
 
 Getting data into R
@@ -375,7 +375,7 @@ packages beforehand:
 - `plyr` - tools for splitting, applying and combining data
 - `reshape2` - reshaping data
 
-(These are part of what's known as the HadleyVerse.) We'll also use this *data package*:
+(These are part of what's known as the *HadleyVerse*.) We'll also use this data package:
 - `babynames` - names provided to the SSA 1880-2013
 
 These can all be installed using R's `install.packages` command.
@@ -462,30 +462,30 @@ pew <- read.table(
 ```{r, echo=FALSE}
 # don't want R to depend on Internet connection here
 pew <- structure(list(religion = c("Agnostic", "Atheist", "Buddhist", 
-"Catholic", "Don’t know/refused", "Evangelical Prot", "Hindu", 
-"Historically Black Prot", "Jehovah's Witness", "Jewish", "Mainline Prot", 
-"Mormon", "Muslim", "Orthodox", "Other Christian", "Other Faiths", 
-"Other World Religions", "Unaffiliated"), `<$10k` = c(27L, 12L, 
-27L, 418L, 15L, 575L, 1L, 228L, 20L, 19L, 289L, 29L, 6L, 13L, 
-9L, 20L, 5L, 217L), `$10-20k` = c(34L, 27L, 21L, 617L, 14L, 869L, 
-9L, 244L, 27L, 19L, 495L, 40L, 7L, 17L, 7L, 33L, 2L, 299L), `$20-30k` = c(60L, 
-37L, 30L, 732L, 15L, 1064L, 7L, 236L, 24L, 25L, 619L, 48L, 9L, 
-23L, 11L, 40L, 3L, 374L), `$30-40k` = c(81L, 52L, 34L, 670L, 
-11L, 982L, 9L, 238L, 24L, 25L, 655L, 51L, 10L, 32L, 13L, 46L, 
-4L, 365L), `$40-50k` = c(76L, 35L, 33L, 638L, 10L, 881L, 11L, 
-197L, 21L, 30L, 651L, 56L, 9L, 32L, 13L, 49L, 2L, 341L), `$50-75k` = c(137L, 
-70L, 58L, 1116L, 35L, 1486L, 34L, 223L, 30L, 95L, 1107L, 112L, 
-23L, 47L, 14L, 63L, 7L, 528L), `$75-100k` = c(122L, 73L, 62L, 
-949L, 21L, 949L, 47L, 131L, 15L, 69L, 939L, 85L, 16L, 38L, 18L, 
-46L, 3L, 407L), `$100-150k` = c(109L, 59L, 39L, 792L, 17L, 723L, 
-48L, 81L, 11L, 87L, 753L, 49L, 8L, 42L, 14L, 40L, 4L, 321L), 
-    `>150k` = c(84L, 74L, 53L, 633L, 18L, 414L, 54L, 78L, 6L, 
-    151L, 634L, 42L, 6L, 46L, 12L, 41L, 4L, 258L), `Don't know/refused` = c(96L, 
-    76L, 54L, 1489L, 116L, 1529L, 37L, 339L, 37L, 162L, 1328L, 
-    69L, 22L, 73L, 18L, 71L, 8L, 597L)), .Names = c("religion", 
-"<$10k", "$10-20k", "$20-30k", "$30-40k", "$40-50k", "$50-75k", 
-"$75-100k", "$100-150k", ">150k", "Don't know/refused"), class = "data.frame", row.names = c(NA, 
--18L))
+                                   "Catholic", "Don’t know/refused", "Evangelical Prot", "Hindu", 
+                                   "Historically Black Prot", "Jehovah's Witness", "Jewish", "Mainline Prot", 
+                                   "Mormon", "Muslim", "Orthodox", "Other Christian", "Other Faiths", 
+                                   "Other World Religions", "Unaffiliated"), `<$10k` = c(27L, 12L, 
+                                                                                         27L, 418L, 15L, 575L, 1L, 228L, 20L, 19L, 289L, 29L, 6L, 13L, 
+                                                                                         9L, 20L, 5L, 217L), `$10-20k` = c(34L, 27L, 21L, 617L, 14L, 869L, 
+                                                                                                                           9L, 244L, 27L, 19L, 495L, 40L, 7L, 17L, 7L, 33L, 2L, 299L), `$20-30k` = c(60L, 
+                                                                                                                                                                                                     37L, 30L, 732L, 15L, 1064L, 7L, 236L, 24L, 25L, 619L, 48L, 9L, 
+                                                                                                                                                                                                     23L, 11L, 40L, 3L, 374L), `$30-40k` = c(81L, 52L, 34L, 670L, 
+                                                                                                                                                                                                                                             11L, 982L, 9L, 238L, 24L, 25L, 655L, 51L, 10L, 32L, 13L, 46L, 
+                                                                                                                                                                                                                                             4L, 365L), `$40-50k` = c(76L, 35L, 33L, 638L, 10L, 881L, 11L, 
+                                                                                                                                                                                                                                                                      197L, 21L, 30L, 651L, 56L, 9L, 32L, 13L, 49L, 2L, 341L), `$50-75k` = c(137L, 
+                                                                                                                                                                                                                                                                                                                                             70L, 58L, 1116L, 35L, 1486L, 34L, 223L, 30L, 95L, 1107L, 112L, 
+                                                                                                                                                                                                                                                                                                                                             23L, 47L, 14L, 63L, 7L, 528L), `$75-100k` = c(122L, 73L, 62L, 
+                                                                                                                                                                                                                                                                                                                                                                                           949L, 21L, 949L, 47L, 131L, 15L, 69L, 939L, 85L, 16L, 38L, 18L, 
+                                                                                                                                                                                                                                                                                                                                                                                           46L, 3L, 407L), `$100-150k` = c(109L, 59L, 39L, 792L, 17L, 723L, 
+                                                                                                                                                                                                                                                                                                                                                                                                                           48L, 81L, 11L, 87L, 753L, 49L, 8L, 42L, 14L, 40L, 4L, 321L), 
+                      `>150k` = c(84L, 74L, 53L, 633L, 18L, 414L, 54L, 78L, 6L, 
+                                  151L, 634L, 42L, 6L, 46L, 12L, 41L, 4L, 258L), `Don't know/refused` = c(96L, 
+                                                                                                          76L, 54L, 1489L, 116L, 1529L, 37L, 339L, 37L, 162L, 1328L, 
+                                                                                                          69L, 22L, 73L, 18L, 71L, 8L, 597L)), .Names = c("religion", 
+                                                                                                                                                          "<$10k", "$10-20k", "$20-30k", "$30-40k", "$40-50k", "$50-75k", 
+                                                                                                                                                          "$75-100k", "$100-150k", ">150k", "Don't know/refused"), class = "data.frame", row.names = c(NA, 
+                                                                                                                                                                                                                                                       -18L))
 ```
 
 
@@ -517,27 +517,16 @@ Examining data frames
 ========================================================
 
 ```{r}
-nrow(cars)
-head(cars)
+nrow(cars); ncol(cars)
+dim(cars)
 ```
 
 ***
 
 ```{r}
-ncol(cars)
+head(cars)
 tail(cars)
 ```
-
-
-Examining data frames
-========================================================
-
-For very large data frames, you might want to take a random sample of the rows to be able to plot or get a sense of things.
-```{r}
-library(babynames) # has 1,792,091 rows
-babynames[sample(nrow(babynames), 3), ]
-```
-This uses the extremely useful function `sample` to randomly sample from a vector.
 
 
 Examining data frames
@@ -591,6 +580,17 @@ Negative notation excludes!
 ```{r}
 cars[2, -1] 
 ```
+
+
+Examining data frames
+========================================================
+
+For very large data frames, you might want to take a random sample of the rows to be able to plot or get a sense of things.
+```{r}
+library(babynames) # has 1,792,091 rows
+babynames[sample(nrow(babynames), 3), ]
+```
+This uses the extremely useful function `sample` to randomly sample from a vector.
 
 
 Subsetting data frames
@@ -698,7 +698,7 @@ Computing on columns
 * naive (slow) loop
 ```{r, eval=FALSE}
 for(i in seq_along(x)) {
-  # calculate mean...
+# calculate mean...
 ```
 * `filter` (note its `sides` argument)
 ```{r, eval=FALSE}
@@ -787,12 +787,12 @@ In R, `for` loops are rarely the fastest way to do something (although they may 
 ```{r, cache=TRUE, echo=FALSE}
 slowtime <- system.time({
   samplenums <- rep(1, length(vnums))
-s <- 1
-for(i in seq_along(vnums)[-1]) {
-  if(vnums[i] != vnums[i-1])
-    s <- s + 1
-  samplenums[i] <- s
-}
+  s <- 1
+  for(i in seq_along(vnums)[-1]) {
+    if(vnums[i] != vnums[i-1])
+      s <- s + 1
+    samplenums[i] <- s
+  }
 })
 
 fasttime <- system.time(cumsum(c(TRUE, vnums[-length(vnums)] != vnums[-1])))
@@ -894,6 +894,12 @@ History lesson
 <img src="images/history.png" width="850" />
 
 
+A tale of two pipelines
+========================================================
+
+<img src="images/pipeline_detail.png" width="850" />
+
+
 Reshaping data
 ========================================================
 
@@ -926,13 +932,11 @@ Reshaping the Pew data
 
 ```{r}
 library(reshape2)
-pew_long <- melt(pew, id.vars="religion")
+pew_long <- melt(pew,id.var="religion")
 head(pew_long)
 ```
 
 These data are now *long*.
-
-(I.e., `melt` has transformed them into 'molten' data.)
 
 
 Reshaping the Pew data
@@ -946,7 +950,7 @@ pew_original <- dcast(pew_long,
 all.equal(pew_original, pew)
 ```
 
-We've just transformed it back into its orignial form!
+We've just transformed it back into its original form!
 
 ```{r, echo=FALSE}
 print(pew[1:5, 1:4], row.names=FALSE)
@@ -959,18 +963,7 @@ Reshaping the Pew data
 Casting in the `reshape2` package can also involve data summarizing.
 
 ```{r}
-dcast(pew_long, religion ~ .)
-```
-
-
-Reshaping the Pew data
-========================================================
-
-The aggregation function defaults to `length` but we can supply our own, as well as supply a value to use for missing combinations.
-
-```{r}
-reshape2::dcast(pew_long, religion ~ ., 
-                fun.aggregate=mean)
+dcast(pew_long, religion ~ ., mean)
 ```
 
 
@@ -980,7 +973,7 @@ Reshaping the Pew data
 Can have more than one `id` variable in your rows or columns.
 
 ```{r}
-dcast(pew_long, religion + variable ~ ., mean)
+dcast(pew_long, religion + variable ~ ., mean)[1:3, ]
 ```
 
 
@@ -994,61 +987,22 @@ The built-in (and very famous) `iris` dataset gives the measurements (in cm) of 
 iris[1:5, 2:5]
 ```
 
-`iris` has `r nrow(iris)` rows and `r ncol(iris)` columns and is *wide*. Why?
+`iris` has `r nrow(iris)` rows and `r ncol(iris)` columns. Is it *wide* or *long*? Why?
 
 
 Exercise: Reshaping data
 ========================================================
 type: prompt
 
-Use the `reshape2` package's `melt`, `colsplit`, `dcast` functions to make this nice summary table:
-```{r, echo=FALSE}
-iris_long <- melt(iris)
-newcols <- colsplit(iris_long$variable, "\\.", names=c("PlantPart","Dimension"))
-iris_long <- cbind(iris_long, newcols)
-iris_wide <- dcast(iris_long, Species + PlantPart ~ Dimension, fun.aggregate = mean)
-iris_wide
-```
+1. What variables are `id` in the `iris` data? What are the measured variable(s)?
 
-There is a tricky step when you use `colsplit`...
+2. From a data manipulation aspect, what is particularly inconvenient about the `iris` structure (look at the column names)?
 
+3. Try reshaping the `iris` data: melt it into long format, then make it wide in at least four different forms.
 
-Exercise: Reshaping data
-========================================================
-type: prompt
-incremental: true
+4. Why does `dcast(iris_long, variable ~ Species)` generate a warning?
 
-Steps:
-
-1. Think: what's the `id` variable(s)? What are the measured variable(s)?
-2. Melt the `iris` data to long form.
-3. Create new columns `PlantPart` and `Dimensions` by splitting apart the column containing "Sepal.length", etc.
-4. Join these columns to the long data.
-5. A single `dcast` call will create the summary table.
-
-**The trick**: in step #3, you'll need to use `pattern="\\."`
-
-
-Exercise: Reshaping data
-========================================================
-type: prompt
-
-```{r, eval=FALSE}
-# Step 2
-# Notice that melt guesses the id var correctly
-iris_long <- melt(iris)  
-
-# Step 3
-newcols <- colsplit(iris_long$variable, 
-                    pattern="\\.", 
-                    names=c("PlantPart","Dimension"))
-
-# Step 4
-iris_long <- cbind(iris_long, newcols)
-
-# Step 5
-dcast(iris_long, Species + PlantPart ~ Dimension, fun.aggregate = mean)
-```
+5. Melt the `pew` data into a `pew_long` dataframe.
 
 
 Summarizing and operating on data
@@ -1059,13 +1013,39 @@ type: section
 Summarizing and operating on data
 ========================================================
 
-Intro - typical kinds of tasks
+Thinking back to the typical data pipeline, we often want to summarize data by groups as an intermediate or final step. For example, for each subgroup we might want to:
+
+* Compute mean, max, min, etc. (`n`->1)
+* Compute rolling mean and other window functions (`n`->`n`)
+* Fit models and extract their parameters, goodness of fit, etc.
+
+
+Summarizing and operating on data
+========================================================
+
+More specific examples:
+
+* `iris`: how many samples were taken from each species?
+* `babynames`: what's the most common name over time?
+* `cars`: for each speed, what's the farthest distance traveled?
+
+TODO
+
+
+Split-apply-combine
+========================================================
+
+These are generally known as *split-apply-combine* problems.
+
+<img src="images/splitapply.png" width="650" />
+
+From https://ramnathv.github.io/pycon2014-r/explore/sac.html
 
 
 The apply family
 ========================================================
 
-Traditionally the *apply* family of functions was R's solution. 
+Traditionally the *apply* family of functions was R's solution. Unfortunately they have inconsistent and confusing syntax, middling performance, and functional quirks.
 
 Function      | Description
 ------------- | ------------
@@ -1077,7 +1057,100 @@ base::mapply  |  Apply a Function to Multiple List or Vector Arguments
 base::rapply  |  Recursively Apply a Function to a List
 base::tapply  |  Apply a Function Over a Ragged Array
 
-This table is copied from https://nsaunders.wordpress.com/2010/08/20/a-brief-introduction-to-apply-in-r/, which provides a simple, readable summary of these functions.
+https://nsaunders.wordpress.com/2010/08/20/a-brief-introduction-to-apply-in-r/ provides a simple, readable summary of these.
+
+
+plyr
+========================================================
+
+The `plyr` package revolutionized the handling of split-apply-combine 
+problems in R, providing a consistent naming scheme and interface, syntactic sugar for concise code, good performance, and great flexibility.
+
+Input      | Output: Array | Output: Data frame | Ouptut: List | Discard output
+---------- | ------------- | ------------------ | ------------ | --------------
+Array      | `aaply`       | `adply`            | `alply`      | `a_ply`
+Data frame | `daply`       | **`ddply`**        | `dlply`      | `d_ply`
+List       | `laply`       | `ldply`            | `llply`      | `l_ply`
+
+
+plyr
+========================================================
+
+<img src="images/plyr_split_apply_combine.png" width="750" />
+
+Wickham (2011), The Split-Apply-Combine Strategy for Data Analysis. *J. Stat. Software* 40(1):1-29, http://www.jstatsoft.org/v40/i01/paper.
+
+
+dplyr
+========================================================
+
+The newer `dplyr` package makes a different tradeoff: it specializes in data frames, recognizing that most people use them most of the time, and is extremely fast.
+
+`dplyr` also allows you to work with remote, out-of-memory data, using exactly the same tools, because dplyr will translate your R code into the appropriate SQL.
+
+In other words, `dplyr` abstracts away *how* your data is stored.
+
+
+Aside: operation pipelines in R
+========================================================
+
+`dplyr` *imports*, and its examples make heavy use of, the `magrittr` package, which changes R syntax (remember, every operation is a function) to introduce a **pipe** operator `%>%`. This 
+* structures sequences of data operations left-to-right (as opposed to inside-out)
+* avoids nested function calls
+* minimizes the need for local variables
+* makes it easy to add steps anywhere in a sequence of operations
+
+Not everyone is a fan of piping, and there are situations where it's not appropriate; but we'll stick to `dplyr` convention and use it frequently.
+
+
+Operation pipelines in R
+========================================================
+
+Standard R notation:
+```{r, eval=FALSE}
+x <- read_my_data(f)
+y <- process_data(clean_data(x), otherdata)
+z <- summarize_data(y)
+```
+
+Notation using a `magrittr` pipe:
+```{r, eval=FALSE}
+z <- read_my_data(f) %>%
+  clean_data() %>%
+  process_data(otherdata) %>%
+  summarize_data()
+```
+
+Remember, `magrittr` is independent of `dplyr` - you can use pipes anywhere useful.
+
+
+Grouping
+========================================================
+
+
+
+Summarizing
+========================================================
+
+Each summary operation peels off one grouping layer!
+
+
+```{r}
+library(dplyr)
+library(babynames)
+group_by(babynames, year, sex) %>% 
+  summarise(prop=max(prop), 
+            name=name[which.max(prop)])
+```
+
+qplot(year, prop, data=popnames, color=name) + facet_grid(sex~.) + guides(col=guide_legend(nrow=9))
+
+
+
+Merging datasets
+========================================================
+
+(briefly...built-in `merge`, and `data.table` and `dplyr` have fast database-style joins)
 
 
 Robustness and performance
@@ -1136,3 +1209,7 @@ dplyr
 >The best thing about R is that it was written by statisticians. The worst thing about R is that it was written by statisticians.
 
 (Bow Cowgill.)
+
+
+The fact that every action in R is a function — including operators — allowed for the development of new syntax models, like the %>% pipe operator in magrittr.
+

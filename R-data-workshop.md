@@ -21,7 +21,7 @@ Three hours of action & entertainment
 (break)
 
 - Summarizing data (45 minutes)
-- Robustness and performance (30 minutes)
+- Robustness and speed (30 minutes)
 
 **Breadth more than depth**
 
@@ -75,8 +75,8 @@ This workshop assumes you understand the basics of using R:
 - What R is
 - How to start and quit it
 - How to get help
-  + `?read.table`
-  + `help(package='dplyr')`
++ `?read.table`
++ `help(package='dplyr')`
 
 
 Things you should know: basics
@@ -382,10 +382,10 @@ You can't reproduce
 ========================================================
 ...what doesn't exist.
 - Gozilla ate my computer
-    + backup
-    + ideally *continuous*
++ backup
++ ideally *continuous*
 - Godzilla ate my office
-    + cloud
++ cloud
 
 ***
 
@@ -397,9 +397,9 @@ You can't reproduce
 
 ...what you've lost. What if you need access to a file as it existed 1, 10, or 100, or 1000 days ago?
 - Incremental backups
-    - minimum
+- minimum
 - Version control
-    - better
+- better
 
 ***
 
@@ -482,14 +482,14 @@ Reproducible research example
 ========================================================
 
 - Sequentially numbered R scripts
-    + (0-download.R, 1-process_data.R, ...)
++ (0-download.R, 1-process_data.R, ...)
 - Each script depends on the previous one
 - Each has a discrete, logical function
 - Each produces a *log file*
-    + including date/time, what R version, etc.
++ including date/time, what R version, etc.
 - This analytical chain starts with raw data
 - ...and ends with figures and tables for ms
-    + *or the ms itself!*
++ *or the ms itself!*
 
 
 Getting data into R
@@ -505,7 +505,7 @@ packages beforehand:
 - `plyr` - tools for splitting, applying and combining data
 - `reshape2` - reshaping data
 
-(These are part of what's known as the HadleyVerse.) We'll also use this *data package*:
+(These are part of what's known as the *HadleyVerse*.) We'll also use this data package:
 - `babynames` - names provided to the SSA 1880-2013
 
 These can all be installed using R's `install.packages` command.
@@ -642,12 +642,27 @@ Examining data frames
 
 
 ```r
-nrow(cars)
+nrow(cars); ncol(cars)
 ```
 
 ```
 [1] 50
 ```
+
+```
+[1] 2
+```
+
+```r
+dim(cars)
+```
+
+```
+[1] 50  2
+```
+
+***
+
 
 ```r
 head(cars)
@@ -663,17 +678,6 @@ head(cars)
 6     9   10
 ```
 
-***
-
-
-```r
-ncol(cars)
-```
-
-```
-[1] 2
-```
-
 ```r
 tail(cars)
 ```
@@ -687,25 +691,6 @@ tail(cars)
 49    24  120
 50    25   85
 ```
-
-
-Examining data frames
-========================================================
-
-For very large data frames, you might want to take a random sample of the rows to be able to plot or get a sense of things.
-
-```r
-library(babynames) # has 1,792,091 rows
-babynames[sample(nrow(babynames), 3), ]
-```
-
-```
-        year sex    name  n         prop
-574930  1960   F Sherrye 24 1.153905e-05
-635488  1965   F Kelleen 32 1.751291e-05
-1484153 2004   M  Shahan  6 2.841921e-06
-```
-This uses the extremely useful function `sample` to randomly sample from a vector.
 
 
 Examining data frames
@@ -813,6 +798,25 @@ cars[2, -1]
 ```
 [1] 10
 ```
+
+
+Examining data frames
+========================================================
+
+For very large data frames, you might want to take a random sample of the rows to be able to plot or get a sense of things.
+
+```r
+library(babynames) # has 1,792,091 rows
+babynames[sample(nrow(babynames), 3), ]
+```
+
+```
+        year sex    name  n         prop
+1379562 2001   F Reionna  5 2.526190e-06
+1082596 1990   F   Besma  5 2.434923e-06
+1173700 1994   F   Jaida 37 1.898786e-05
+```
+This uses the extremely useful function `sample` to randomly sample from a vector.
 
 
 Subsetting data frames
@@ -962,7 +966,7 @@ Computing on columns
 
 ```r
 for(i in seq_along(x)) {
-  # calculate mean...
+# calculate mean...
 ```
 * `filter` (note its `sides` argument)
 
@@ -1216,6 +1220,12 @@ History lesson
 <img src="images/history.png" width="850" />
 
 
+A tale of two pipelines
+========================================================
+
+<img src="images/pipeline_detail.png" width="850" />
+
+
 Reshaping data
 ========================================================
 
@@ -1259,7 +1269,7 @@ Reshaping the Pew data
 
 ```r
 library(reshape2)
-pew_long <- melt(pew, id.vars="religion")
+pew_long <- melt(pew,id.var="religion")
 head(pew_long)
 ```
 
@@ -1274,8 +1284,6 @@ head(pew_long)
 ```
 
 These data are now *long*.
-
-(I.e., `melt` has transformed them into 'molten' data.)
 
 
 Reshaping the Pew data
@@ -1294,7 +1302,7 @@ all.equal(pew_original, pew)
 [1] TRUE
 ```
 
-We've just transformed it back into its orignial form!
+We've just transformed it back into its original form!
 
 
 ```
@@ -1314,41 +1322,7 @@ Casting in the `reshape2` package can also involve data summarizing.
 
 
 ```r
-dcast(pew_long, religion ~ .)
-```
-
-```
-                  religion  .
-1                 Agnostic 10
-2                  Atheist 10
-3                 Buddhist 10
-4                 Catholic 10
-5       Don’t know/refused 10
-6         Evangelical Prot 10
-7                    Hindu 10
-8  Historically Black Prot 10
-9        Jehovah's Witness 10
-10                  Jewish 10
-11           Mainline Prot 10
-12                  Mormon 10
-13                  Muslim 10
-14                Orthodox 10
-15         Other Christian 10
-16            Other Faiths 10
-17   Other World Religions 10
-18            Unaffiliated 10
-```
-
-
-Reshaping the Pew data
-========================================================
-
-The aggregation function defaults to `length` but we can supply our own, as well as supply a value to use for missing combinations.
-
-
-```r
-reshape2::dcast(pew_long, religion ~ ., 
-                fun.aggregate=mean)
+dcast(pew_long, religion ~ ., mean)
 ```
 
 ```
@@ -1381,191 +1355,14 @@ Can have more than one `id` variable in your rows or columns.
 
 
 ```r
-dcast(pew_long, religion + variable ~ ., mean)
+dcast(pew_long, religion + variable ~ ., mean)[1:3, ]
 ```
 
 ```
-                   religion           variable    .
-1                  Agnostic              <$10k   27
-2                  Agnostic            $10-20k   34
-3                  Agnostic            $20-30k   60
-4                  Agnostic            $30-40k   81
-5                  Agnostic            $40-50k   76
-6                  Agnostic            $50-75k  137
-7                  Agnostic           $75-100k  122
-8                  Agnostic          $100-150k  109
-9                  Agnostic              >150k   84
-10                 Agnostic Don't know/refused   96
-11                  Atheist              <$10k   12
-12                  Atheist            $10-20k   27
-13                  Atheist            $20-30k   37
-14                  Atheist            $30-40k   52
-15                  Atheist            $40-50k   35
-16                  Atheist            $50-75k   70
-17                  Atheist           $75-100k   73
-18                  Atheist          $100-150k   59
-19                  Atheist              >150k   74
-20                  Atheist Don't know/refused   76
-21                 Buddhist              <$10k   27
-22                 Buddhist            $10-20k   21
-23                 Buddhist            $20-30k   30
-24                 Buddhist            $30-40k   34
-25                 Buddhist            $40-50k   33
-26                 Buddhist            $50-75k   58
-27                 Buddhist           $75-100k   62
-28                 Buddhist          $100-150k   39
-29                 Buddhist              >150k   53
-30                 Buddhist Don't know/refused   54
-31                 Catholic              <$10k  418
-32                 Catholic            $10-20k  617
-33                 Catholic            $20-30k  732
-34                 Catholic            $30-40k  670
-35                 Catholic            $40-50k  638
-36                 Catholic            $50-75k 1116
-37                 Catholic           $75-100k  949
-38                 Catholic          $100-150k  792
-39                 Catholic              >150k  633
-40                 Catholic Don't know/refused 1489
-41       Don’t know/refused              <$10k   15
-42       Don’t know/refused            $10-20k   14
-43       Don’t know/refused            $20-30k   15
-44       Don’t know/refused            $30-40k   11
-45       Don’t know/refused            $40-50k   10
-46       Don’t know/refused            $50-75k   35
-47       Don’t know/refused           $75-100k   21
-48       Don’t know/refused          $100-150k   17
-49       Don’t know/refused              >150k   18
-50       Don’t know/refused Don't know/refused  116
-51         Evangelical Prot              <$10k  575
-52         Evangelical Prot            $10-20k  869
-53         Evangelical Prot            $20-30k 1064
-54         Evangelical Prot            $30-40k  982
-55         Evangelical Prot            $40-50k  881
-56         Evangelical Prot            $50-75k 1486
-57         Evangelical Prot           $75-100k  949
-58         Evangelical Prot          $100-150k  723
-59         Evangelical Prot              >150k  414
-60         Evangelical Prot Don't know/refused 1529
-61                    Hindu              <$10k    1
-62                    Hindu            $10-20k    9
-63                    Hindu            $20-30k    7
-64                    Hindu            $30-40k    9
-65                    Hindu            $40-50k   11
-66                    Hindu            $50-75k   34
-67                    Hindu           $75-100k   47
-68                    Hindu          $100-150k   48
-69                    Hindu              >150k   54
-70                    Hindu Don't know/refused   37
-71  Historically Black Prot              <$10k  228
-72  Historically Black Prot            $10-20k  244
-73  Historically Black Prot            $20-30k  236
-74  Historically Black Prot            $30-40k  238
-75  Historically Black Prot            $40-50k  197
-76  Historically Black Prot            $50-75k  223
-77  Historically Black Prot           $75-100k  131
-78  Historically Black Prot          $100-150k   81
-79  Historically Black Prot              >150k   78
-80  Historically Black Prot Don't know/refused  339
-81        Jehovah's Witness              <$10k   20
-82        Jehovah's Witness            $10-20k   27
-83        Jehovah's Witness            $20-30k   24
-84        Jehovah's Witness            $30-40k   24
-85        Jehovah's Witness            $40-50k   21
-86        Jehovah's Witness            $50-75k   30
-87        Jehovah's Witness           $75-100k   15
-88        Jehovah's Witness          $100-150k   11
-89        Jehovah's Witness              >150k    6
-90        Jehovah's Witness Don't know/refused   37
-91                   Jewish              <$10k   19
-92                   Jewish            $10-20k   19
-93                   Jewish            $20-30k   25
-94                   Jewish            $30-40k   25
-95                   Jewish            $40-50k   30
-96                   Jewish            $50-75k   95
-97                   Jewish           $75-100k   69
-98                   Jewish          $100-150k   87
-99                   Jewish              >150k  151
-100                  Jewish Don't know/refused  162
-101           Mainline Prot              <$10k  289
-102           Mainline Prot            $10-20k  495
-103           Mainline Prot            $20-30k  619
-104           Mainline Prot            $30-40k  655
-105           Mainline Prot            $40-50k  651
-106           Mainline Prot            $50-75k 1107
-107           Mainline Prot           $75-100k  939
-108           Mainline Prot          $100-150k  753
-109           Mainline Prot              >150k  634
-110           Mainline Prot Don't know/refused 1328
-111                  Mormon              <$10k   29
-112                  Mormon            $10-20k   40
-113                  Mormon            $20-30k   48
-114                  Mormon            $30-40k   51
-115                  Mormon            $40-50k   56
-116                  Mormon            $50-75k  112
-117                  Mormon           $75-100k   85
-118                  Mormon          $100-150k   49
-119                  Mormon              >150k   42
-120                  Mormon Don't know/refused   69
-121                  Muslim              <$10k    6
-122                  Muslim            $10-20k    7
-123                  Muslim            $20-30k    9
-124                  Muslim            $30-40k   10
-125                  Muslim            $40-50k    9
-126                  Muslim            $50-75k   23
-127                  Muslim           $75-100k   16
-128                  Muslim          $100-150k    8
-129                  Muslim              >150k    6
-130                  Muslim Don't know/refused   22
-131                Orthodox              <$10k   13
-132                Orthodox            $10-20k   17
-133                Orthodox            $20-30k   23
-134                Orthodox            $30-40k   32
-135                Orthodox            $40-50k   32
-136                Orthodox            $50-75k   47
-137                Orthodox           $75-100k   38
-138                Orthodox          $100-150k   42
-139                Orthodox              >150k   46
-140                Orthodox Don't know/refused   73
-141         Other Christian              <$10k    9
-142         Other Christian            $10-20k    7
-143         Other Christian            $20-30k   11
-144         Other Christian            $30-40k   13
-145         Other Christian            $40-50k   13
-146         Other Christian            $50-75k   14
-147         Other Christian           $75-100k   18
-148         Other Christian          $100-150k   14
-149         Other Christian              >150k   12
-150         Other Christian Don't know/refused   18
-151            Other Faiths              <$10k   20
-152            Other Faiths            $10-20k   33
-153            Other Faiths            $20-30k   40
-154            Other Faiths            $30-40k   46
-155            Other Faiths            $40-50k   49
-156            Other Faiths            $50-75k   63
-157            Other Faiths           $75-100k   46
-158            Other Faiths          $100-150k   40
-159            Other Faiths              >150k   41
-160            Other Faiths Don't know/refused   71
-161   Other World Religions              <$10k    5
-162   Other World Religions            $10-20k    2
-163   Other World Religions            $20-30k    3
-164   Other World Religions            $30-40k    4
-165   Other World Religions            $40-50k    2
-166   Other World Religions            $50-75k    7
-167   Other World Religions           $75-100k    3
-168   Other World Religions          $100-150k    4
-169   Other World Religions              >150k    4
-170   Other World Religions Don't know/refused    8
-171            Unaffiliated              <$10k  217
-172            Unaffiliated            $10-20k  299
-173            Unaffiliated            $20-30k  374
-174            Unaffiliated            $30-40k  365
-175            Unaffiliated            $40-50k  341
-176            Unaffiliated            $50-75k  528
-177            Unaffiliated           $75-100k  407
-178            Unaffiliated          $100-150k  321
-179            Unaffiliated              >150k  258
-180            Unaffiliated Don't know/refused  597
+  religion variable  .
+1 Agnostic    <$10k 27
+2 Agnostic  $10-20k 34
+3 Agnostic  $20-30k 60
 ```
 
 
@@ -1585,65 +1382,22 @@ The built-in (and very famous) `iris` dataset gives the measurements (in cm) of 
 5         3.6          1.4         0.2  setosa
 ```
 
-`iris` has 150 rows and 5 columns and is *wide*. Why?
+`iris` has 150 rows and 5 columns. Is it *wide* or *long*? Why?
 
 
 Exercise: Reshaping data
 ========================================================
 type: prompt
 
-Use the `reshape2` package's `melt`, `colsplit`, `dcast` functions to make this nice summary table:
+1. What variables are `id` in the `iris` data? What are the measured variable(s)?
 
-```
-     Species PlantPart Length Width
-1     setosa     Petal  1.462 0.246
-2     setosa     Sepal  5.006 3.428
-3 versicolor     Petal  4.260 1.326
-4 versicolor     Sepal  5.936 2.770
-5  virginica     Petal  5.552 2.026
-6  virginica     Sepal  6.588 2.974
-```
+2. From a data manipulation aspect, what is particularly inconvenient about the `iris` structure (look at the column names)?
 
-There is a tricky step when you use `colsplit`...
+3. Try reshaping the `iris` data: melt it into long format, then make it wide in at least four different forms.
 
+4. Why does `dcast(iris_long, variable ~ Species)` generate a warning?
 
-Exercise: Reshaping data
-========================================================
-type: prompt
-incremental: true
-
-Steps:
-
-1. Think: what's the `id` variable(s)? What are the measured variable(s)?
-2. Melt the `iris` data to long form.
-3. Create new columns `PlantPart` and `Dimensions` by splitting apart the column containing "Sepal.length", etc.
-4. Join these columns to the long data.
-5. A single `dcast` call will create the summary table.
-
-**The trick**: in step #3, you'll need to use `pattern="\\."`
-
-
-Exercise: Reshaping data
-========================================================
-type: prompt
-
-
-```r
-# Step 2
-# Notice that melt guesses the id var correctly
-iris_long <- melt(iris)  
-
-# Step 3
-newcols <- colsplit(iris_long$variable, 
-                    pattern="\\.", 
-                    names=c("PlantPart","Dimension"))
-
-# Step 4
-iris_long <- cbind(iris_long, newcols)
-
-# Step 5
-dcast(iris_long, Species + PlantPart ~ Dimension, fun.aggregate = mean)
-```
+5. Melt the `pew` data into a `pew_long` dataframe.
 
 
 Summarizing and operating on data
@@ -1654,13 +1408,39 @@ type: section
 Summarizing and operating on data
 ========================================================
 
-Intro - typical kinds of tasks
+Thinking back to the typical data pipeline, we often want to summarize data by groups as an intermediate or final step. For example, for each subgroup we might want to:
+
+* Compute mean, max, min, etc. (`n`->1)
+* Compute rolling mean and other window functions (`n`->`n`)
+* Fit models and extract their parameters, goodness of fit, etc.
+
+
+Summarizing and operating on data
+========================================================
+
+More specific examples:
+
+* `iris`: how many samples were taken from each species?
+* `babynames`: what's the most common name over time?
+* `cars`: for each speed, what's the farthest distance traveled?
+
+TODO
+
+
+Split-apply-combine
+========================================================
+
+These are generally known as *split-apply-combine* problems.
+
+<img src="images/splitapply.png" width="650" />
+
+From https://ramnathv.github.io/pycon2014-r/explore/sac.html
 
 
 The apply family
 ========================================================
 
-Traditionally the *apply* family of functions was R's solution. 
+Traditionally the *apply* family of functions was R's solution. Unfortunately they have inconsistent and confusing syntax, middling performance, and functional quirks.
 
 Function      | Description
 ------------- | ------------
@@ -1672,7 +1452,121 @@ base::mapply  |  Apply a Function to Multiple List or Vector Arguments
 base::rapply  |  Recursively Apply a Function to a List
 base::tapply  |  Apply a Function Over a Ragged Array
 
-This table is copied from https://nsaunders.wordpress.com/2010/08/20/a-brief-introduction-to-apply-in-r/, which provides a simple, readable summary of these functions.
+https://nsaunders.wordpress.com/2010/08/20/a-brief-introduction-to-apply-in-r/ provides a simple, readable summary of these.
+
+
+plyr
+========================================================
+
+The `plyr` package revolutionized the handling of split-apply-combine 
+problems in R, providing a consistent naming scheme and interface, syntactic sugar for concise code, good performance, and great flexibility.
+
+Input      | Output: Array | Output: Data frame | Ouptut: List | Discard output
+---------- | ------------- | ------------------ | ------------ | --------------
+Array      | `aaply`       | `adply`            | `alply`      | `a_ply`
+Data frame | `daply`       | **`ddply`**        | `dlply`      | `d_ply`
+List       | `laply`       | `ldply`            | `llply`      | `l_ply`
+
+
+plyr
+========================================================
+
+<img src="images/plyr_split_apply_combine.png" width="750" />
+
+Wickham (2011), The Split-Apply-Combine Strategy for Data Analysis. *J. Stat. Software* 40(1):1-29, http://www.jstatsoft.org/v40/i01/paper.
+
+
+dplyr
+========================================================
+
+The newer `dplyr` package makes a different tradeoff: it specializes in data frames, recognizing that most people use them most of the time, and is extremely fast.
+
+`dplyr` also allows you to work with remote, out-of-memory data, using exactly the same tools, because dplyr will translate your R code into the appropriate SQL.
+
+In other words, `dplyr` abstracts away *how* your data is stored.
+
+
+Aside: operation pipelines in R
+========================================================
+
+`dplyr` *imports*, and its examples make heavy use of, the `magrittr` package, which changes R syntax (remember, every operation is a function) to introduce a **pipe** operator `%>%`. This 
+* structures sequences of data operations left-to-right (as opposed to inside-out)
+* avoids nested function calls
+* minimizes the need for local variables
+* makes it easy to add steps anywhere in a sequence of operations
+
+Not everyone is a fan of piping, and there are situations where it's not appropriate; but we'll stick to `dplyr` convention and use it frequently.
+
+
+Operation pipelines in R
+========================================================
+
+Standard R notation:
+
+```r
+x <- read_my_data(f)
+y <- process_data(clean_data(x), otherdata)
+z <- summarize_data(y)
+```
+
+Notation using a `magrittr` pipe:
+
+```r
+z <- read_my_data(f) %>%
+  clean_data() %>%
+  process_data(otherdata) %>%
+  summarize_data()
+```
+
+Remember, `magrittr` is independent of `dplyr` - you can use pipes anywhere useful.
+
+
+Grouping
+========================================================
+
+
+
+Summarizing
+========================================================
+
+Each summary operation peels off one grouping layer!
+
+
+
+```r
+library(dplyr)
+library(babynames)
+group_by(babynames, year, sex) %>% 
+  summarise(prop=max(prop), 
+            name=name[which.max(prop)])
+```
+
+```
+Source: local data frame [268 x 4]
+Groups: year
+
+   year sex       prop name
+1  1880   F 0.07238359 Mary
+2  1880   M 0.08154561 John
+3  1881   F 0.06998999 Mary
+4  1881   M 0.08098075 John
+5  1882   F 0.07042473 Mary
+6  1882   M 0.07831552 John
+7  1883   F 0.06673052 Mary
+8  1883   M 0.07907113 John
+9  1884   F 0.06698985 Mary
+10 1884   M 0.07648564 John
+..  ... ...        ...  ...
+```
+
+qplot(year, prop, data=popnames, color=name) + facet_grid(sex~.) + guides(col=guide_legend(nrow=9))
+
+
+
+Merging datasets
+========================================================
+
+(briefly...built-in `merge`, and `data.table` and `dplyr` have fast database-style joins)
 
 
 Robustness and performance
@@ -1731,3 +1625,7 @@ dplyr
 >The best thing about R is that it was written by statisticians. The worst thing about R is that it was written by statisticians.
 
 (Bow Cowgill.)
+
+
+The fact that every action in R is a function — including operators — allowed for the development of new syntax models, like the %>% pipe operator in magrittr.
+
