@@ -1060,17 +1060,25 @@ base::tapply  |  Apply a Function Over a Ragged Array
 https://nsaunders.wordpress.com/2010/08/20/a-brief-introduction-to-apply-in-r/ provides a simple, readable summary of these.
 
 
+aggregate
+========================================================
+
+TODO
+
+
 plyr
 ========================================================
 
 The `plyr` package revolutionized the handling of split-apply-combine 
-problems in R, providing a consistent naming scheme and interface, syntactic sugar for concise code, good performance, and great flexibility.
+problems in R, providing a consistent naming scheme and interface, allowing concise code, good performance, and lots of flexibility.
 
 Input      | Output: Array | Output: Data frame | Ouptut: List | Discard output
 ---------- | ------------- | ------------------ | ------------ | --------------
 Array      | `aaply`       | `adply`            | `alply`      | `a_ply`
 Data frame | `daply`       | **`ddply`**        | `dlply`      | `d_ply`
 List       | `laply`       | `ldply`            | `llply`      | `l_ply`
+
+Most of `dplyr` is equivalent to `ddply` + various functions.
 
 
 plyr
@@ -1086,7 +1094,7 @@ dplyr
 
 The newer `dplyr` package makes a different tradeoff: it specializes in data frames, recognizing that most people use them most of the time, and is extremely fast.
 
-`dplyr` also allows you to work with remote, out-of-memory data, using exactly the same tools, because dplyr will translate your R code into the appropriate SQL.
+`dplyr` also allows you to work with remote, out-of-memory databases, using exactly the same tools, because dplyr will translate your R code into the appropriate SQL.
 
 In other words, `dplyr` abstracts away *how* your data is stored.
 
@@ -1124,33 +1132,177 @@ z <- read_my_data(f) %>%
 Remember, `magrittr` is independent of `dplyr` - you can use pipes anywhere useful.
 
 
+Verbs
+========================================================
+
+`dplyr` provides functions for each basic *verb* of data manipulation. These tend to have analogues in base R, but use a consistent, compact syntax, and are very high performance.
+
+* `filter()` - subset rows; like `base::subset()`
+* `arrange()` - reorder rows; is a wrapper for `order()`
+* `select()` - select columns
+* `mutate()`: add new columns; like `base::transform()
+* `summarise()`: like `aggregate` or `plyr::ddply`
+
+
 Grouping
 ========================================================
 
 
 
-Summarizing
+Summarizing iris
 ========================================================
-
-Each summary operation peels off one grouping layer!
-
 
 ```{r}
 library(dplyr)
-library(babynames)
-group_by(babynames, year, sex) %>% 
+iris %>% 
+  group_by(Species) %>% 
+  summarise(Sepal.Length=mean(Sepal.Length))
+```
+
+
+Summarizing iris
+========================================================
+
+We can easily apply (multiple) functions across (multiple) columns.
+```{r}
+iris %>% 
+  group_by(Species) %>% 
+  summarise_each(funs(mean, sd), Petal.Width, Sepal.Length)
+```
+
+
+Summarizing babynames
+========================================================
+
+Note that each summary operation peels off one grouping layer.
+```{r}
+babynames %>%
+  group_by(year, sex) %>% 
   summarise(prop=max(prop), 
             name=name[which.max(prop)])
 ```
 
-qplot(year, prop, data=popnames, color=name) + facet_grid(sex~.) + guides(col=guide_legend(nrow=9))
 
+Summarizing babynames
+========================================================
+
+```{r, echo=FALSE, eval=FALSE}
+# This is code used to generate figure below
+library(babynames)
+library(dplyr)
+library(ggplot2)
+theme_set(theme_bw())
+popnames <- babynames %>% group_by(year, sex) %>% 
+  summarise(prop=max(prop), 
+            name=name[which.max(prop)])
+displaynames <- popnames %>% 
+  group_by(sex, name) %>% 
+  summarise(year=min(year), prop=prop[which.min(year)])
+p <- qplot(year, prop, data=popnames, color=name) + facet_grid(sex~.) 
+p <- p + guides(color=FALSE) #col=guide_legend(nrow=9))
+p <- p + geom_text(data=displaynames, aes(label=name), size=4, vjust=-1)
+p + coord_cartesian(ylim=c(0, 0.09))
+ggsave("images/babynames.png", width=8, height=5)
+```
+
+<img src="images/babynames.png" width="850" />
+
+[Linda Darnell?](https://en.wikipedia.org/wiki/Linda_Darnell)
+
+
+Summarizing babynames
+========================================================
+
+Times to summarize the 1.8 million row `babynames` using base R, `plyr`, and `dplyr`.
+
+In general `dplyr` is ~10x faster than `plyr`, which in turn is ~10x faster than base R.
+
+Base R also tends to require many more lines of code.
+
+***
+
+```{r, echo=FALSE, cache=TRUE}
+tms <- c()
+tms["dplyr"] <- as.numeric(system.time(group_by(babynames, year, sex) %>% 
+                                         summarise(prop=max(prop), 
+                                                   name=name[which.max(prop)]))[3])
+tms["plyr"] <- as.numeric(system.time(ddply(babynames, .(year, sex), summarise, prop=max(prop)))[3])
+tms["base R"] <- as.numeric(system.time(aggregate(prop ~ year + sex, babynames,  FUN=max))[3])
+tms <- as.data.frame(tms)
+tms$method <- rownames(tms)
+tms$tms <- round(tms$tms, 2)
+qplot(method, tms, data=tms, geom="bar", stat="identity") + 
+  geom_text(aes(label=tms), vjust=-0.5) + 
+  ylab("Time (seconds)")
+```
+
+
+Useful summary functions
+========================================================
+
+`dplyr` provides some useful summarizing functions:
+
+* `n()` - number of observations in current group
+* `n_distinct(x)` - number of unique values in `x`
+* `first(x)`, `last(x)`, `nth(x, n)` - extract particular elements
+
+
+Window functions
+========================================================
+
+*Window functions* take `n` values and return `n` values. This can be useful for computing lags, ranks, etc. For example, let's look at the popularity of the name "Mary":
+
+```{r}
+babynames %>% 
+  group_by(year, sex) %>% 
+  mutate(rank = dense_rank(desc(prop))) %>%
+  filter(name == "Mary")
+```
+
+```{r, echo=FALSE}
+d <- babynames %>% 
+  group_by(year, sex) %>% 
+  mutate(rank = dense_rank(desc(prop))) %>%
+  filter(name == "Mary" & sex == "F")
+qplot(year, rank, data=d)
+```
 
 
 Merging datasets
 ========================================================
 
 (briefly...built-in `merge`, and `data.table` and `dplyr` have fast database-style joins)
+
+
+Exercise: Summarizing data
+========================================================
+type: prompt
+incremental: true
+
+1. Use `dplyr` and the `babynames` data to calculate the 5th most popular name for girls in each year.
+
+2. TODO: pew
+
+
+Exercise: Summarizing data
+========================================================
+type: prompt
+incremental: true
+
+```{r}
+babynames %>% 
+  filter(sex == 'F') %>% 
+  group_by(year) %>% 
+  summarise(fifth=nth(name, 5))
+```
+
+
+Exercise: Summarizing data
+========================================================
+type: prompt
+incremental: true
+
+TODO: answer to pew
 
 
 Robustness and performance

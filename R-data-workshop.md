@@ -811,10 +811,10 @@ babynames[sample(nrow(babynames), 3), ]
 ```
 
 ```
-        year sex    name  n         prop
-1379562 2001   F Reionna  5 2.526190e-06
-1082596 1990   F   Besma  5 2.434923e-06
-1173700 1994   F   Jaida 37 1.898786e-05
+        year sex   name   n         prop
+1712307 2011   M  Rishi 135 6.668926e-05
+223301  1924   M Vernan   5 4.277127e-06
+859904  1979   M  Kyler  13 7.257206e-06
 ```
 This uses the extremely useful function `sample` to randomly sample from a vector.
 
@@ -1455,17 +1455,25 @@ base::tapply  |  Apply a Function Over a Ragged Array
 https://nsaunders.wordpress.com/2010/08/20/a-brief-introduction-to-apply-in-r/ provides a simple, readable summary of these.
 
 
+aggregate
+========================================================
+
+TODO
+
+
 plyr
 ========================================================
 
 The `plyr` package revolutionized the handling of split-apply-combine 
-problems in R, providing a consistent naming scheme and interface, syntactic sugar for concise code, good performance, and great flexibility.
+problems in R, providing a consistent naming scheme and interface, allowing concise code, good performance, and lots of flexibility.
 
 Input      | Output: Array | Output: Data frame | Ouptut: List | Discard output
 ---------- | ------------- | ------------------ | ------------ | --------------
 Array      | `aaply`       | `adply`            | `alply`      | `a_ply`
 Data frame | `daply`       | **`ddply`**        | `dlply`      | `d_ply`
 List       | `laply`       | `ldply`            | `llply`      | `l_ply`
+
+Most of `dplyr` is equivalent to `ddply` + various functions.
 
 
 plyr
@@ -1481,7 +1489,7 @@ dplyr
 
 The newer `dplyr` package makes a different tradeoff: it specializes in data frames, recognizing that most people use them most of the time, and is extremely fast.
 
-`dplyr` also allows you to work with remote, out-of-memory data, using exactly the same tools, because dplyr will translate your R code into the appropriate SQL.
+`dplyr` also allows you to work with remote, out-of-memory databases, using exactly the same tools, because dplyr will translate your R code into the appropriate SQL.
 
 In other words, `dplyr` abstracts away *how* your data is stored.
 
@@ -1521,22 +1529,74 @@ z <- read_my_data(f) %>%
 Remember, `magrittr` is independent of `dplyr` - you can use pipes anywhere useful.
 
 
+Verbs
+========================================================
+
+`dplyr` provides functions for each basic *verb* of data manipulation. These tend to have analogues in base R, but use a consistent, compact syntax, and are very high performance.
+
+* `filter()` - subset rows; like `base::subset()`
+* `arrange()` - reorder rows; is a wrapper for `order()`
+* `select()` - select columns
+* `mutate()`: add new columns; like `base::transform()
+* `summarise()`: like `aggregate` or `plyr::ddply`
+
+
 Grouping
 ========================================================
 
 
 
-Summarizing
+Summarizing iris
 ========================================================
-
-Each summary operation peels off one grouping layer!
-
 
 
 ```r
 library(dplyr)
-library(babynames)
-group_by(babynames, year, sex) %>% 
+iris %>% 
+  group_by(Species) %>% 
+  summarise(Sepal.Length=mean(Sepal.Length))
+```
+
+```
+Source: local data frame [3 x 2]
+
+     Species Sepal.Length
+1     setosa        5.006
+2 versicolor        5.936
+3  virginica        6.588
+```
+
+
+Summarizing iris
+========================================================
+
+We can easily apply (multiple) functions across (multiple) columns.
+
+```r
+iris %>% 
+  group_by(Species) %>% 
+  summarise_each(funs(mean, sd), Petal.Width, Sepal.Length)
+```
+
+```
+Source: local data frame [3 x 5]
+
+     Species Petal.Width_mean Sepal.Length_mean Petal.Width_sd
+1     setosa            0.246             5.006      0.1053856
+2 versicolor            1.326             5.936      0.1977527
+3  virginica            2.026             6.588      0.2746501
+Variables not shown: Sepal.Length_sd (dbl)
+```
+
+
+Summarizing babynames
+========================================================
+
+Note that each summary operation peels off one grouping layer.
+
+```r
+babynames %>%
+  group_by(year, sex) %>% 
   summarise(prop=max(prop), 
             name=name[which.max(prop)])
 ```
@@ -1559,14 +1619,128 @@ Groups: year
 ..  ... ...        ...  ...
 ```
 
-qplot(year, prop, data=popnames, color=name) + facet_grid(sex~.) + guides(col=guide_legend(nrow=9))
 
+Summarizing babynames
+========================================================
+
+
+
+<img src="images/babynames.png" width="850" />
+
+[Linda Darnell?](https://en.wikipedia.org/wiki/Linda_Darnell)
+
+
+Summarizing babynames
+========================================================
+
+Times to summarize the 1.8 million row `babynames` using base R, `plyr`, and `dplyr`.
+
+In general `dplyr` is ~10x faster than `plyr`, which in turn is ~10x faster than base R.
+
+Base R also tends to require many more lines of code.
+
+***
+
+![plot of chunk unnamed-chunk-69](R-data-workshop-figure/unnamed-chunk-69-1.png) 
+
+
+Useful summary functions
+========================================================
+
+`dplyr` provides some useful summarizing functions:
+
+* `n()` - number of observations in current group
+* `n_distinct(x)` - number of unique values in `x`
+* `first(x)`, `last(x)`, `nth(x, n)` - extract particular elements
+
+
+Window functions
+========================================================
+
+*Window functions* take `n` values and return `n` values. This can be useful for computing lags, ranks, etc. For example, let's look at the popularity of the name "Mary":
+
+
+```r
+babynames %>% 
+  group_by(year, sex) %>% 
+  mutate(rank = dense_rank(desc(prop))) %>%
+  filter(name == "Mary")
+```
+
+```
+Source: local data frame [263 x 6]
+Groups: year, sex
+
+   year sex name    n         prop rank
+1  1880   F Mary 7065 0.0723835869    1
+2  1880   M Mary   27 0.0002280405  181
+3  1881   F Mary 6919 0.0699899855    1
+4  1881   M Mary   29 0.0002678118  163
+5  1882   F Mary 8148 0.0704247264    1
+6  1882   M Mary   30 0.0002458372  182
+7  1883   F Mary 8012 0.0667305210    1
+8  1883   M Mary   32 0.0002844925  171
+9  1884   F Mary 9217 0.0669898538    1
+10 1884   M Mary   36 0.0002932981  180
+..  ... ...  ...  ...          ...  ...
+```
+
+![plot of chunk unnamed-chunk-71](R-data-workshop-figure/unnamed-chunk-71-1.png) 
 
 
 Merging datasets
 ========================================================
 
 (briefly...built-in `merge`, and `data.table` and `dplyr` have fast database-style joins)
+
+
+Exercise: Summarizing data
+========================================================
+type: prompt
+incremental: true
+
+1. Use `dplyr` and the `babynames` data to calculate the 5th most popular name for girls in each year.
+
+2. TODO: pew
+
+
+Exercise: Summarizing data
+========================================================
+type: prompt
+incremental: true
+
+
+```r
+babynames %>% 
+  filter(sex == 'F') %>% 
+  group_by(year) %>% 
+  summarise(fifth=nth(name, 5))
+```
+
+```
+Source: local data frame [134 x 2]
+
+   year    fifth
+1  1880   Minnie
+2  1881 Margaret
+3  1882   Minnie
+4  1883   Minnie
+5  1884   Minnie
+6  1885 Margaret
+7  1886   Minnie
+8  1887 Margaret
+9  1888 Margaret
+10 1889     Emma
+..  ...      ...
+```
+
+
+Exercise: Summarizing data
+========================================================
+type: prompt
+incremental: true
+
+TODO: answer to pew
 
 
 Robustness and performance
