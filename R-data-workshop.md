@@ -10,6 +10,7 @@ Three hours, 50% lecture and 50% working examples and problems.
 Feedback: <a href="mailto:bondlamberty@pnnl">Email</a>  [Twitter](https://twitter.com/BenBondLamberty)
 
 
+
 Three hours of action & entertainment
 ========================================================
 
@@ -17,9 +18,6 @@ Three hours of action & entertainment
 - Getting data into R (20 minutes)
 - Cleaning data (20 minutes)
 - Reshaping data (30 minutes)
-
-(break)
-
 - Summarizing data (45 minutes)
 - Robustness and speed (30 minutes)
 
@@ -287,12 +285,16 @@ for(i in 1:4) { cat(i) }
 ```
 
 
-Things you should know: control flow
+Things you should know: programs
 ========================================================
 
 The difference between a *script* and *command line*.
 
-In general, you want to use scripts.
+In general, you want to use scripts, which provide *persistence* and *reproducibility*.
+
+***
+
+<img src="images/mayan_script.gif" />
 
 
 
@@ -309,7 +311,7 @@ qplot(speed, dist, data=cars)
 
 ***
 
-![plot of chunk unnamed-chunk-11](R-data-workshop-figure/unnamed-chunk-11-1.png) 
+![plot of chunk unnamed-chunk-12](R-data-workshop-figure/unnamed-chunk-12-1.png) 
 
 
 Quiz: Basics
@@ -348,7 +350,7 @@ x[-1] # ?
 ```
 
 ```r
-data.frame(x=x, y=y)
+data.frame(x, y)
 ```
 
 ```
@@ -452,6 +454,7 @@ Be clear in your code.
 finaldata <- plot(merge(process(read.csv( "rawdata.csv")), otherdata))
 ```
 
+There are many ways to make this clearer...
 
 ```r
 finaldata <- read.csv("rawdata.csv") %>%
@@ -502,7 +505,6 @@ Things to install beforehand
 If you're doing the exercises and problems, you should have installed these
 packages beforehand:
 - `dplyr` - fast, flexible tool for working with data frames
-- `plyr` - tools for splitting, applying and combining data
 - `reshape2` - reshaping data
 
 (These are part of what's known as the *HadleyVerse*.) We'll also use this data package:
@@ -811,10 +813,12 @@ babynames[sample(nrow(babynames), 3), ]
 ```
 
 ```
-        year sex    name    n         prop
-1379302 2001   F   Milah    5 2.526190e-06
-1412822 2002   M Azariah   46 2.227726e-05
-148710  1918   F  Louise 9109 7.575921e-03
+Source: local data frame [3 x 5]
+
+  year sex    name  n         prop
+1 1929   F  Lonnie 89 7.689589e-05
+2 1967   F Demarie  6 3.495422e-06
+3 1960   M   Kwame  6 2.769945e-06
 ```
 This uses the extremely useful function `sample` to randomly sample from a vector.
 
@@ -856,7 +860,7 @@ We already used `ggplot2` to plot the `cars` dataset. Can also do this using bas
 plot(cars$speed, cars$dist)
 ```
 
-![plot of chunk unnamed-chunk-34](R-data-workshop-figure/unnamed-chunk-34-1.png) 
+![plot of chunk unnamed-chunk-35](R-data-workshop-figure/unnamed-chunk-35-1.png) 
 
 
 Exercise: Examining data frames
@@ -887,18 +891,17 @@ incremental: true
 
 
 ```r
-library(babynames)
 cat(nrow(babynames), ncol(babynames), babynames[12345, "name"])
+
+s <- babynames[sample(1:nrow(babynames), 
+                      0.01 * nrow(babynames)),]
+
+sum(babynames$year < 1900) # better than nrow(subset(...))
 ```
+
 
 ```
 1792091 5 Baxter
-```
-
-```r
-s <- babynames[sample(1:nrow(babynames), 0.01 * nrow(babynames)),]
-
-sum(babynames$year < 1900) # better than nrow(subset(...))
 ```
 
 ```
@@ -954,7 +957,7 @@ d
 3 3 6 12 not four
 ```
 
-R provides a set of high performance functions for many of these tasks: `cumsum`, `cumprod`, `colMeans`, `colSums`, `rowMeans`, `rowSums`, etc.
+R provides a set of high performance functions for many of these tasks: `cumsum`, `colMeans`, `colSums`, `rowMeans`, `rowSums`, etc.
 
 
 Computing on columns
@@ -988,7 +991,7 @@ incremental: true
 
 In the previous example, we used `seq_along(x)` instead of `1:length(x)` (or `nrow`). Why?
 
-Because if `d` has zero rows or elements...
+Because if `x` has zero rows or elements...
 
 
 ```r
@@ -1033,6 +1036,7 @@ incremental: true
 
 
 ```r
+# Slow and functional
 samplenums <- rep(1, length(vnums))
 s <- 1
 for(i in seq_along(vnums)[-1]) {
@@ -1049,6 +1053,7 @@ samplenums
 
 
 ```r
+# Fast and elegant
 newvalve <- c(TRUE, vnums[-length(vnums)] != vnums[-1])
 cumsum(newvalve)
 ```
@@ -1072,7 +1077,7 @@ In R, `for` loops are rarely the fastest way to do something (although they may 
 
 ***
 
-![plot of chunk unnamed-chunk-48](R-data-workshop-figure/unnamed-chunk-48-1.png) 
+![plot of chunk unnamed-chunk-50](R-data-workshop-figure/unnamed-chunk-50-1.png) 
 
 
 Combining columns
@@ -1355,14 +1360,191 @@ Can have more than one `id` variable in your rows or columns.
 
 
 ```r
-dcast(pew_long, religion + variable ~ ., mean)[1:3, ]
+dcast(pew_long, religion + variable ~ ., mean)
 ```
 
 ```
-  religion variable  .
-1 Agnostic    <$10k 27
-2 Agnostic  $10-20k 34
-3 Agnostic  $20-30k 60
+                   religion           variable    .
+1                  Agnostic              <$10k   27
+2                  Agnostic            $10-20k   34
+3                  Agnostic            $20-30k   60
+4                  Agnostic            $30-40k   81
+5                  Agnostic            $40-50k   76
+6                  Agnostic            $50-75k  137
+7                  Agnostic           $75-100k  122
+8                  Agnostic          $100-150k  109
+9                  Agnostic              >150k   84
+10                 Agnostic Don't know/refused   96
+11                  Atheist              <$10k   12
+12                  Atheist            $10-20k   27
+13                  Atheist            $20-30k   37
+14                  Atheist            $30-40k   52
+15                  Atheist            $40-50k   35
+16                  Atheist            $50-75k   70
+17                  Atheist           $75-100k   73
+18                  Atheist          $100-150k   59
+19                  Atheist              >150k   74
+20                  Atheist Don't know/refused   76
+21                 Buddhist              <$10k   27
+22                 Buddhist            $10-20k   21
+23                 Buddhist            $20-30k   30
+24                 Buddhist            $30-40k   34
+25                 Buddhist            $40-50k   33
+26                 Buddhist            $50-75k   58
+27                 Buddhist           $75-100k   62
+28                 Buddhist          $100-150k   39
+29                 Buddhist              >150k   53
+30                 Buddhist Don't know/refused   54
+31                 Catholic              <$10k  418
+32                 Catholic            $10-20k  617
+33                 Catholic            $20-30k  732
+34                 Catholic            $30-40k  670
+35                 Catholic            $40-50k  638
+36                 Catholic            $50-75k 1116
+37                 Catholic           $75-100k  949
+38                 Catholic          $100-150k  792
+39                 Catholic              >150k  633
+40                 Catholic Don't know/refused 1489
+41       Don’t know/refused              <$10k   15
+42       Don’t know/refused            $10-20k   14
+43       Don’t know/refused            $20-30k   15
+44       Don’t know/refused            $30-40k   11
+45       Don’t know/refused            $40-50k   10
+46       Don’t know/refused            $50-75k   35
+47       Don’t know/refused           $75-100k   21
+48       Don’t know/refused          $100-150k   17
+49       Don’t know/refused              >150k   18
+50       Don’t know/refused Don't know/refused  116
+51         Evangelical Prot              <$10k  575
+52         Evangelical Prot            $10-20k  869
+53         Evangelical Prot            $20-30k 1064
+54         Evangelical Prot            $30-40k  982
+55         Evangelical Prot            $40-50k  881
+56         Evangelical Prot            $50-75k 1486
+57         Evangelical Prot           $75-100k  949
+58         Evangelical Prot          $100-150k  723
+59         Evangelical Prot              >150k  414
+60         Evangelical Prot Don't know/refused 1529
+61                    Hindu              <$10k    1
+62                    Hindu            $10-20k    9
+63                    Hindu            $20-30k    7
+64                    Hindu            $30-40k    9
+65                    Hindu            $40-50k   11
+66                    Hindu            $50-75k   34
+67                    Hindu           $75-100k   47
+68                    Hindu          $100-150k   48
+69                    Hindu              >150k   54
+70                    Hindu Don't know/refused   37
+71  Historically Black Prot              <$10k  228
+72  Historically Black Prot            $10-20k  244
+73  Historically Black Prot            $20-30k  236
+74  Historically Black Prot            $30-40k  238
+75  Historically Black Prot            $40-50k  197
+76  Historically Black Prot            $50-75k  223
+77  Historically Black Prot           $75-100k  131
+78  Historically Black Prot          $100-150k   81
+79  Historically Black Prot              >150k   78
+80  Historically Black Prot Don't know/refused  339
+81        Jehovah's Witness              <$10k   20
+82        Jehovah's Witness            $10-20k   27
+83        Jehovah's Witness            $20-30k   24
+84        Jehovah's Witness            $30-40k   24
+85        Jehovah's Witness            $40-50k   21
+86        Jehovah's Witness            $50-75k   30
+87        Jehovah's Witness           $75-100k   15
+88        Jehovah's Witness          $100-150k   11
+89        Jehovah's Witness              >150k    6
+90        Jehovah's Witness Don't know/refused   37
+91                   Jewish              <$10k   19
+92                   Jewish            $10-20k   19
+93                   Jewish            $20-30k   25
+94                   Jewish            $30-40k   25
+95                   Jewish            $40-50k   30
+96                   Jewish            $50-75k   95
+97                   Jewish           $75-100k   69
+98                   Jewish          $100-150k   87
+99                   Jewish              >150k  151
+100                  Jewish Don't know/refused  162
+101           Mainline Prot              <$10k  289
+102           Mainline Prot            $10-20k  495
+103           Mainline Prot            $20-30k  619
+104           Mainline Prot            $30-40k  655
+105           Mainline Prot            $40-50k  651
+106           Mainline Prot            $50-75k 1107
+107           Mainline Prot           $75-100k  939
+108           Mainline Prot          $100-150k  753
+109           Mainline Prot              >150k  634
+110           Mainline Prot Don't know/refused 1328
+111                  Mormon              <$10k   29
+112                  Mormon            $10-20k   40
+113                  Mormon            $20-30k   48
+114                  Mormon            $30-40k   51
+115                  Mormon            $40-50k   56
+116                  Mormon            $50-75k  112
+117                  Mormon           $75-100k   85
+118                  Mormon          $100-150k   49
+119                  Mormon              >150k   42
+120                  Mormon Don't know/refused   69
+121                  Muslim              <$10k    6
+122                  Muslim            $10-20k    7
+123                  Muslim            $20-30k    9
+124                  Muslim            $30-40k   10
+125                  Muslim            $40-50k    9
+126                  Muslim            $50-75k   23
+127                  Muslim           $75-100k   16
+128                  Muslim          $100-150k    8
+129                  Muslim              >150k    6
+130                  Muslim Don't know/refused   22
+131                Orthodox              <$10k   13
+132                Orthodox            $10-20k   17
+133                Orthodox            $20-30k   23
+134                Orthodox            $30-40k   32
+135                Orthodox            $40-50k   32
+136                Orthodox            $50-75k   47
+137                Orthodox           $75-100k   38
+138                Orthodox          $100-150k   42
+139                Orthodox              >150k   46
+140                Orthodox Don't know/refused   73
+141         Other Christian              <$10k    9
+142         Other Christian            $10-20k    7
+143         Other Christian            $20-30k   11
+144         Other Christian            $30-40k   13
+145         Other Christian            $40-50k   13
+146         Other Christian            $50-75k   14
+147         Other Christian           $75-100k   18
+148         Other Christian          $100-150k   14
+149         Other Christian              >150k   12
+150         Other Christian Don't know/refused   18
+151            Other Faiths              <$10k   20
+152            Other Faiths            $10-20k   33
+153            Other Faiths            $20-30k   40
+154            Other Faiths            $30-40k   46
+155            Other Faiths            $40-50k   49
+156            Other Faiths            $50-75k   63
+157            Other Faiths           $75-100k   46
+158            Other Faiths          $100-150k   40
+159            Other Faiths              >150k   41
+160            Other Faiths Don't know/refused   71
+161   Other World Religions              <$10k    5
+162   Other World Religions            $10-20k    2
+163   Other World Religions            $20-30k    3
+164   Other World Religions            $30-40k    4
+165   Other World Religions            $40-50k    2
+166   Other World Religions            $50-75k    7
+167   Other World Religions           $75-100k    3
+168   Other World Religions          $100-150k    4
+169   Other World Religions              >150k    4
+170   Other World Religions Don't know/refused    8
+171            Unaffiliated              <$10k  217
+172            Unaffiliated            $10-20k  299
+173            Unaffiliated            $20-30k  374
+174            Unaffiliated            $30-40k  365
+175            Unaffiliated            $40-50k  341
+176            Unaffiliated            $50-75k  528
+177            Unaffiliated           $75-100k  407
+178            Unaffiliated          $100-150k  321
+179            Unaffiliated              >150k  258
+180            Unaffiliated Don't know/refused  597
 ```
 
 
@@ -1374,15 +1556,15 @@ The built-in (and very famous) `iris` dataset gives the measurements (in cm) of 
 
 
 ```
-  Sepal.Width Petal.Length Petal.Width Species
-1         3.5          1.4         0.2  setosa
-2         3.0          1.4         0.2  setosa
-3         3.2          1.3         0.2  setosa
-4         3.1          1.5         0.2  setosa
-5         3.6          1.4         0.2  setosa
+  Sepal.Length Sepal.Width Species
+1          5.1         3.5  setosa
+2          4.9         3.0  setosa
+3          4.7         3.2  setosa
+4          4.6         3.1  setosa
+5          5.0         3.6  setosa
 ```
 
-`iris` has 150 rows and 5 columns. Is it *wide* or *long*? Why?
+`iris` has 150 rows and 5 columns (two columns are not shown above). Is it *wide* or *long*? Why?
 
 
 Exercise: Reshaping data
@@ -1400,6 +1582,42 @@ type: prompt
 5. Melt the `pew` data into a `pew_long` dataframe.
 
 
+Merging datasets
+========================================================
+
+Often, as we clean and reshape data, we want to merge different datasets together. The built-in `merge` command does this well.
+
+Let's say we have a data frame containing information on how pretty each of the `iris` species is:
+
+```
+     Species    pretty yearFound
+1     setosa      ugly      1950
+2 versicolor        ok      1961
+3  virginica beautiful      1880
+```
+
+
+Merging datasets
+========================================================
+
+`merge` looks for names in common between two data frames, and uses these to merge. Various options allow us to control the merge behavior (what happens to unmatched rows, what columns to use, etc).
+
+```r
+merge(iris, howpretty)
+```
+
+```
+       Species Sepal.Length    pretty yearFound
+1       setosa          5.1      ugly      1950
+2       setosa          4.9      ugly      1950
+50      setosa          5.0      ugly      1950
+100 versicolor          5.7        ok      1961
+150  virginica          5.9 beautiful      1880
+```
+
+The `data.table` and `dplyr` packages feature more varied, faster database-style join operations.
+
+
 Summarizing and operating on data
 ========================================================
 type: section
@@ -1414,17 +1632,11 @@ Thinking back to the typical data pipeline, we often want to summarize data by g
 * Compute rolling mean and other window functions (`n`->`n`)
 * Fit models and extract their parameters, goodness of fit, etc.
 
-
-Summarizing and operating on data
-========================================================
-
-More specific examples:
+Specific examples:
 
 * `iris`: how many samples were taken from each species?
 * `babynames`: what's the most common name over time?
 * `cars`: for each speed, what's the farthest distance traveled?
-
-TODO
 
 
 Split-apply-combine
@@ -1458,7 +1670,36 @@ https://nsaunders.wordpress.com/2010/08/20/a-brief-introduction-to-apply-in-r/ p
 aggregate
 ========================================================
 
-TODO
+R also has a built-in `aggregate` function. It's not particularly fast or flexible, and confusingly has a number of different forms. 
+
+It can however be useful for simple operations:
+
+```r
+aggregate(dist ~ speed, data=cars, FUN=max)
+```
+
+```
+   speed dist
+1      4   10
+2      7   22
+3      8   16
+4      9   10
+5     10   34
+6     11   28
+7     12   28
+8     13   46
+9     14   80
+10    15   54
+11    16   40
+12    17   50
+13    18   84
+14    19   68
+15    20   64
+16    22   66
+17    23   54
+18    24  120
+19    25   85
+```
 
 
 plyr
@@ -1544,7 +1785,30 @@ Verbs
 Grouping
 ========================================================
 
-TODO
+`dplyr` verbs become particularly powerful when used in conjunction with *groups* we define in the dataset. The `group_by` function converts an existing data frame into a grouped `tbl`.
+
+
+```r
+group_by(babynames, year, sex)
+```
+
+```
+Source: local data frame [1,792,091 x 5]
+Groups: year, sex
+
+   year sex      name    n       prop
+1  1880   F      Mary 7065 0.07238359
+2  1880   F      Anna 2604 0.02667896
+3  1880   F      Emma 2003 0.02052149
+4  1880   F Elizabeth 1939 0.01986579
+5  1880   F    Minnie 1746 0.01788843
+6  1880   F  Margaret 1578 0.01616720
+7  1880   F       Ida 1472 0.01508119
+8  1880   F     Alice 1414 0.01448696
+9  1880   F    Bertha 1320 0.01352390
+10 1880   F     Sarah 1288 0.01319605
+..  ... ...       ...  ...        ...
+```
 
 
 Summarizing iris
@@ -1552,8 +1816,6 @@ Summarizing iris
 
 
 ```r
-library(plyr)
-library(dplyr)
 iris %>% 
   group_by(Species) %>% 
   summarise(Sepal.Length=mean(Sepal.Length))
@@ -1594,7 +1856,7 @@ Variables not shown: Sepal.Length_sd (dbl)
 Summarizing babynames
 ========================================================
 
-Note that each summary operation peels off one grouping layer.
+Note that each summary operation peels off one grouping layer. What does this calculate?
 
 ```r
 babynames %>%
@@ -1635,7 +1897,7 @@ Summarizing babynames
 Summarizing babynames
 ========================================================
 
-Times to summarize the 1.8 million row `babynames` using base R, `plyr`, and `dplyr`.
+Time to summarize the 1.8 million row `babynames` using base R, `plyr`, and `dplyr`.
 
 In general `dplyr` is ~10x faster than `plyr`, which in turn is ~10x faster than base R.
 
@@ -1643,7 +1905,7 @@ Base R also tends to require many more lines of code.
 
 ***
 
-![plot of chunk unnamed-chunk-69](R-data-workshop-figure/unnamed-chunk-69-1.png) 
+![plot of chunk unnamed-chunk-76](R-data-workshop-figure/unnamed-chunk-76-1.png) 
 
 
 Useful summary functions
@@ -1674,10 +1936,10 @@ babynames %>%
 <img src="images/babynames_rank.png" width="950" />
 
 
-Merging datasets
+More advanced summary operations
 ========================================================
 
-(briefly...built-in `merge`, and `data.table` and `dplyr` have fast database-style joins)
+TODO - e.g. fitting linear models - mention
 
 
 Exercise: Summarizing data
@@ -1828,7 +2090,11 @@ Unit testing
 
 If you have a serious piece of code that you will maintain over time, strongly consider **unit testing**.
 
-Test code tests each part of your program, and can be run automatically, so you don't accidentally introduce bugs to previously-working code. See the `testthat` package for more details.
+Test code automatically tests each part of your program, so you don't accidentally introduce bugs to previously-working code. See the `testthat` package for more details.
+
+***
+
+<img src="images/testing.jpg" />
 
 
 Performance
@@ -1856,7 +2122,16 @@ system.time(Sys.sleep(3))
 
 ```
    user  system elapsed 
-  0.000   0.000   3.001 
+  0.000   0.000   3.005 
+```
+
+```r
+system.time(sqrt(1:1e6))
+```
+
+```
+   user  system elapsed 
+  0.006   0.003   0.009 
 ```
 
 The `microbenchmark` package provides much more precise timing and can be very useful.
@@ -1871,6 +2146,7 @@ A more sophisticated way to approach this is by *profiling* your code. R has a b
 f <- function() { for(i in 1:1e6) { sqrt(i) } }
 g <- function() { for(i in 1:1e6) { i } }
 h <- function() { f() + g() }
+h()
 ```
 
 After using `Rprof`...
@@ -1904,8 +2180,29 @@ Most of this list is from http://adv-r.had.co.nz/Profiling.html.
 Speeding up your code
 ========================================================
 
-Better programming
 Loops - don't always have to be slow, but...
+Vectorise
+
+```r
+system.time(for(i in 1:1e6) sqrt(i))
+```
+
+```
+   user  system elapsed 
+  0.244   0.004   0.254 
+```
+
+```r
+system.time(sqrt(1:1e6))
+```
+
+```
+   user  system elapsed 
+  0.005   0.002   0.007 
+```
+
+
+Better programming
 Some functions are generally slow, e.g. `ifelse`.
 move outside of R - Rcpp
 compiler
@@ -1928,8 +2225,8 @@ microbenchmark(
 ```
 Unit: nanoseconds
      expr  min   lq    mean median     uq   max neval
-     pmax 3842 4084 5335.93 4244.5 4521.5 49864   100
- pmax.int  425  472  731.99  514.5  619.5 17551   100
+     pmax 3866 4208 5933.38 4494.0 6787.5 40220   100
+ pmax.int  420  495 1492.85  652.5  879.5 43774   100
 ```
 
 
@@ -2017,26 +2314,15 @@ R also has many contributed *packages* across a wide variety of scientific field
 - Spatial Statistics
 - Time Series
 
-Exercises (10 minutes each):
-Importing data
-Manipulating/subset/index
-Melt/cast
-Summarizing
 
-
-
-Misc
+Last thoughts
 ========================================================
 
-- `nycflights13` - 336,776 flights that departed NYC in 2013
+All the source code for this presentation is available at https://github.com/bpbond/R-data-workshop
 
-plyr in one slide - 
-dplyr
 
 >The best thing about R is that it was written by statisticians. The worst thing about R is that it was written by statisticians.
+>
+>-- Bow Cowgill
 
-(Bow Cowgill.)
-
-
-The fact that every action in R is a function — including operators — allowed for the development of new syntax models, like the %>% pipe operator in magrittr.
 
