@@ -3,7 +3,7 @@ Working with data in R
 author: Ben Bond-Lamberty
 date: June 2015
 
-A JGCRI workshop covering reproducibility, tools, importing, manipulation and aggregation, piping, handling errors, speed (profiling, parallelization), and common use cases.
+A workshop covering reproducibility, tools, importing, manipulation and aggregation, piping, handling errors, speed (profiling, parallelization), and common use cases.
 
 Three hours, 50% lecture and 50% working examples and problems.
 
@@ -31,7 +31,7 @@ Focus of this workshop
 
 <img src="images/pipeline.png" width="1000" />
 
-In a typical data pipline:
+In a typical data pipeline:
 - *Raw data* can come from many sources 
 - *Processing* - cleaning, modifying, reshaping, QC
 - *Summarizing* - merging with other data, groupwise summaries
@@ -811,10 +811,10 @@ babynames[sample(nrow(babynames), 3), ]
 ```
 
 ```
-        year sex   name   n         prop
-1712307 2011   M  Rishi 135 6.668926e-05
-223301  1924   M Vernan   5 4.277127e-06
-859904  1979   M  Kyler  13 7.257206e-06
+        year sex    name    n         prop
+1379302 2001   F   Milah    5 2.526190e-06
+1412822 2002   M Azariah   46 2.227726e-05
+148710  1918   F  Louise 9109 7.575921e-03
 ```
 This uses the extremely useful function `sample` to randomly sample from a vector.
 
@@ -1269,7 +1269,7 @@ Reshaping the Pew data
 
 ```r
 library(reshape2)
-pew_long <- melt(pew,id.var="religion")
+pew_long <- melt(pew, id.var="religion")
 head(pew_long)
 ```
 
@@ -1473,7 +1473,7 @@ Array      | `aaply`       | `adply`            | `alply`      | `a_ply`
 Data frame | `daply`       | **`ddply`**        | `dlply`      | `d_ply`
 List       | `laply`       | `ldply`            | `llply`      | `l_ply`
 
-Most of `dplyr` is equivalent to `ddply` + various functions.
+(Most of `dplyr` is equivalent to `ddply` + various functions.)
 
 
 plyr
@@ -1544,6 +1544,7 @@ Verbs
 Grouping
 ========================================================
 
+TODO
 
 
 Summarizing iris
@@ -1551,6 +1552,7 @@ Summarizing iris
 
 
 ```r
+library(plyr)
 library(dplyr)
 iris %>% 
   group_by(Species) %>% 
@@ -1570,7 +1572,7 @@ Source: local data frame [3 x 2]
 Summarizing iris
 ========================================================
 
-We can easily apply (multiple) functions across (multiple) columns.
+We can apply (multiple) functions across (multiple) columns.
 
 ```r
 iris %>% 
@@ -1647,17 +1649,17 @@ Base R also tends to require many more lines of code.
 Useful summary functions
 ========================================================
 
-`dplyr` provides some useful summarizing functions:
+`dplyr` provides some useful summarizing functions in addition to those provided by base R:
 
 * `n()` - number of observations in current group
 * `n_distinct(x)` - number of unique values in `x`
-* `first(x)`, `last(x)`, `nth(x, n)` - extract particular elements
+* `first(x)`, `last(x)`, `nth(x, n)` - extract particular elements from a group
 
 
 Window functions
 ========================================================
 
-*Window functions* take `n` values and return `n` values. This can be useful for computing lags, ranks, etc. For example, let's look at the popularity of the name "Mary":
+*Window functions* take `n` values and return `n` values. This can be useful for computing lags, ranks, etc. For example, the popularity of "Mary":
 
 
 ```r
@@ -1667,25 +1669,9 @@ babynames %>%
   filter(name == "Mary")
 ```
 
-```
-Source: local data frame [263 x 6]
-Groups: year, sex
 
-   year sex name    n         prop rank
-1  1880   F Mary 7065 0.0723835869    1
-2  1880   M Mary   27 0.0002280405  181
-3  1881   F Mary 6919 0.0699899855    1
-4  1881   M Mary   29 0.0002678118  163
-5  1882   F Mary 8148 0.0704247264    1
-6  1882   M Mary   30 0.0002458372  182
-7  1883   F Mary 8012 0.0667305210    1
-8  1883   M Mary   32 0.0002844925  171
-9  1884   F Mary 9217 0.0669898538    1
-10 1884   M Mary   36 0.0002932981  180
-..  ... ...  ...  ...          ...  ...
-```
 
-![plot of chunk unnamed-chunk-71](R-data-workshop-figure/unnamed-chunk-71-1.png) 
+<img src="images/babynames_rank.png" width="950" />
 
 
 Merging datasets
@@ -1697,24 +1683,58 @@ Merging datasets
 Exercise: Summarizing data
 ========================================================
 type: prompt
-incremental: true
 
-1. Use `dplyr` and the `babynames` data to calculate the 5th most popular name for girls in each year.
+1. Use `dplyr` to calculate the total number of respondents, for each religion, in the `pew_long` data.
 
-2. TODO: pew
+2. Use `dplyr` and the `babynames` data to calculate the 5th most popular name for girls in each year.
 
 
 Exercise: Summarizing data
 ========================================================
 type: prompt
-incremental: true
+
+
+```r
+pew_long %>% 
+  group_by(religion) %>% 
+  summarise(sum(value))
+```
+
+```
+Source: local data frame [18 x 2]
+
+                  religion sum(value)
+1                 Agnostic        826
+2                  Atheist        515
+3                 Buddhist        411
+4                 Catholic       8054
+5       Don’t know/refused        272
+6         Evangelical Prot       9472
+7                    Hindu        257
+8  Historically Black Prot       1995
+9        Jehovah's Witness        215
+10                  Jewish        682
+11           Mainline Prot       7470
+12                  Mormon        581
+13                  Muslim        116
+14                Orthodox        363
+15         Other Christian        129
+16            Other Faiths        449
+17   Other World Religions         42
+18            Unaffiliated       3707
+```
+
+
+Exercise: Summarizing data
+========================================================
+type: prompt
 
 
 ```r
 babynames %>% 
   filter(sex == 'F') %>% 
   group_by(year) %>% 
-  summarise(fifth=nth(name, 5))
+  summarise(fifth=nth(name, 5, order_by=desc(prop)))
 ```
 
 ```
@@ -1735,17 +1755,234 @@ Source: local data frame [134 x 2]
 ```
 
 
-Exercise: Summarizing data
-========================================================
-type: prompt
-incremental: true
-
-TODO: answer to pew
-
-
 Robustness and performance
 ========================================================
 type: section
+
+
+What's robust code?
+========================================================
+
+Robust code handles bad inputs and unexpected/error condition gracefully. This is sometimes called *defensive programming*.
+
+At the beginning of a function or piece of code, *sanity checks* using the built-in function `stopifnot` can be useful:
+
+```r
+stopifnot(is.numeric(x))
+```
+
+The `assertthat` package provides more sophisticated assertion checking and is very useful.
+
+```r
+library(assertthat)
+assert_that(is.writeable("images/"))
+```
+
+
+Gotcha #4: infinity
+========================================================
+type: alert
+incremental: true
+
+Unlike in many other programming languages, division by zero does not generate an error:
+
+```r
+x <- 1/0
+x
+```
+
+```
+[1] Inf
+```
+
+...but this also means you might not catch a problem. Test for this using `is.finite(x)`.
+
+
+try
+========================================================
+
+Some operations can generate code-terminating errors. You might want to *catch* - handle yourself, and recover from - these using `try`:
+
+```r
+x <- try(stop()) #  stop() generates an error
+is.numeric(x); 
+```
+
+```
+[1] FALSE
+```
+
+```r
+assertthat::is.error(x)
+```
+
+```
+[1] TRUE
+```
+
+There's also the more sophisticated `tryCatch`, which has the single worst help page in R.
+
+
+Unit testing
+========================================================
+
+If you have a serious piece of code that you will maintain over time, strongly consider **unit testing**.
+
+Test code tests each part of your program, and can be run automatically, so you don't accidentally introduce bugs to previously-working code. See the `testthat` package for more details.
+
+
+Performance
+========================================================
+
+*By design*, R  is not a fast language: it's intended to make data analysis and statistics easier for people. 
+
+For most purposes, most of the time, it's fast enough.
+
+But not always.
+
+***
+
+<img src="images/stock-illustration-39884236-man-asleep-in-front-of-the-computer.jpg" />
+
+
+Understand what's slow, and why
+========================================================
+
+The simplest way to figure out what's slow is `system.time()`, which provides timing for an expression or code block.
+
+```r
+system.time(Sys.sleep(3))
+```
+
+```
+   user  system elapsed 
+  0.000   0.000   3.001 
+```
+
+The `microbenchmark` package provides much more precise timing and can be very useful.
+
+
+Understand what's slow, and why
+========================================================
+
+A more sophisticated way to approach this is by *profiling* your code. R has a built-in profiler (and, of course, there are packages that provide more functionality).
+
+```r
+f <- function() { for(i in 1:1e6) { sqrt(i) } }
+g <- function() { for(i in 1:1e6) { i } }
+h <- function() { f() + g() }
+```
+
+After using `Rprof`...
+
+
+```r
+       total.time total.pct self.time self.pct
+"h"          0.28    100.00      0.00     0.00
+"f"          0.24     85.71      0.18    64.29
+"sqrt"       0.06     21.43      0.06    21.43
+"g"          0.04     14.29      0.04    14.29
+```
+
+
+Speeding up your code
+========================================================
+
+>Premature optimization is the root of all evil - Donald Knuth
+
+1. Look for existing solutions
+2. Do less work
+3. Vectorise
+4. Parallelise
+5. Avoid copies
+6. Byte-code compile
+7. Move outside of R
+
+Most of this list is from http://adv-r.had.co.nz/Profiling.html.
+
+
+Speeding up your code
+========================================================
+
+Better programming
+Loops - don't always have to be slow, but...
+Some functions are generally slow, e.g. `ifelse`.
+move outside of R - Rcpp
+compiler
+
+
+Internal functions
+========================================================
+
+Be aware that sometimes are there are internal versions of functions that are considerably faster. These are usually noted on the help page.
+
+
+```r
+library(microbenchmark)
+microbenchmark(
+  "pmax"     = pmax(1:5),
+  "pmax.int" = pmax.int(1:5)
+)
+```
+
+```
+Unit: nanoseconds
+     expr  min   lq    mean median     uq   max neval
+     pmax 3842 4084 5335.93 4244.5 4521.5 49864   100
+ pmax.int  425  472  731.99  514.5  619.5 17551   100
+```
+
+
+Gotcha #5: sequential rbind operations
+========================================================
+type: alert
+incremental: true
+
+It's fairly common to need to read in chunks of data, process them in some way, and build up a larger single data set:
+
+```r
+d_final <- data.frame()
+for(f in files_to_process) {
+  d <- read.csv(f)
+  
+  # do something
+  
+  d_final <- rbind(d_final, d)
+}
+```
+
+This will quickly become **very** slow, as R has to re-allocate memory for the growing `d_final` again and again.
+
+
+Gotcha #5: sequential rbind operations
+========================================================
+type: alert
+
+A much better solution is to pre-allocate the final data frame (if you know in advance how big it will be), or use a temporary file:
+
+```r
+tf <- tempfile()
+for(f in files_to_process) {
+  d <- read.csv(f)
+  
+  # do something
+  
+  first <- file.exists(tf)
+  write.table(d, file=tf, sep=",", append=!first, 
+              col.names=first)
+}
+d_final <- read.csv(tf)
+```
+
+
+Moving away from R
+========================================================
+
+R ships with a byte-code compiler that can drastically speed up some kinds of code. TODO.
+
+Rcpp. TODO.
+
+There are faster, experimental version of R like `pqr` (pretty quick R).
 
 
 Resources

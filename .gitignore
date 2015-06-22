@@ -2,6 +2,9 @@
 .Rhistory
 .Rapp.history
 
+# R profiler
+Rprof.out
+
 # Example code in package build process
 *-Ex.R
 
