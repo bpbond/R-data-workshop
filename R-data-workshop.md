@@ -820,10 +820,10 @@ babynames[sample(nrow(babynames), 3), ]
 ```
 Source: local data frame [3 x 5]
 
-  year sex     name  n         prop
-1 1959   M  Salomon 23 1.061704e-05
-2 1994   M  Branton 18 8.834421e-06
-3 1991   F Roshanda 20 9.838249e-06
+  year sex    name  n         prop
+1 1944   F  Arlena 20 1.463743e-05
+2 1984   F Tanieka 10 5.548457e-06
+3 1975   F  Taniko  6 3.844727e-06
 ```
 This uses the extremely useful `sample()` function to randomly sample from a vector.
 
@@ -883,17 +883,20 @@ incremental: true
 
 
 ```r
-cat(nrow(babynames), ncol(babynames), babynames[12345, "name"])
+cat(dim(babynames), 
+    as.character(babynames[12345, "name"]), 
+    length(unique(babynames$name)))
+```
 
+```
+1792091 5 Baxter 92600
+```
+
+```r
 s <- babynames[sample(1:nrow(babynames), 
                       0.01 * nrow(babynames)),]
 
 sum(babynames$year < 1900) # faster and more memory-efficient than nrow(subset(...))
-```
-
-
-```
-1792091 5 Baxter
 ```
 
 ```
@@ -1045,7 +1048,8 @@ samplenums
 
 ```r
 # Vectorised: fast and elegant
-newvalve <- c(TRUE, vnums[-length(vnums)] != vnums[-1])
+newvalve <- c(TRUE,
+              vnums[-length(vnums)] != vnums[-1])
 cumsum(newvalve)
 ```
 
@@ -1068,7 +1072,7 @@ In R, `for` loops are rarely the fastest way to do something (although they may 
 
 ***
 
-![plot of chunk unnamed-chunk-50](R-data-workshop-figure/unnamed-chunk-50-1.png) 
+![plot of chunk unnamed-chunk-49](R-data-workshop-figure/unnamed-chunk-49-1.png) 
 
 
 Combining columns
@@ -1646,17 +1650,18 @@ We can apply (multiple) functions across (multiple) columns.
 iris %>% 
   group_by(Species) %>% 
   summarise_each(funs(mean, sd), 
-                 Petal.Width, Sepal.Length)
+                 Petal.Width, Sepal.Length) %>%
+  str()
 ```
 
 ```
-Source: local data frame [3 x 5]
-
-     Species Petal.Width_mean Sepal.Length_mean Petal.Width_sd
-1     setosa            0.246             5.006      0.1053856
-2 versicolor            1.326             5.936      0.1977527
-3  virginica            2.026             6.588      0.2746501
-Variables not shown: Sepal.Length_sd (dbl)
+Classes 'tbl_df', 'tbl' and 'data.frame':	3 obs. of  5 variables:
+ $ Species          : Factor w/ 3 levels "setosa","versicolor",..: 1 2 3
+ $ Petal.Width_mean : num  0.246 1.326 2.026
+ $ Sepal.Length_mean: num  5.01 5.94 6.59
+ $ Petal.Width_sd   : num  0.105 0.198 0.275
+ $ Sepal.Length_sd  : num  0.352 0.516 0.636
+ - attr(*, "drop")= logi TRUE
 ```
 
 
@@ -1712,7 +1717,7 @@ Base R also tends to require many more lines of code.
 
 ***
 
-![plot of chunk unnamed-chunk-75](R-data-workshop-figure/unnamed-chunk-75-1.png) 
+![plot of chunk unnamed-chunk-74](R-data-workshop-figure/unnamed-chunk-74-1.png) 
 
 
 Useful summary functions
@@ -1728,7 +1733,7 @@ Useful summary functions
 Window functions
 ========================================================
 
-*Window functions* take `n` values and return `n` values. This can be useful for computing lags, ranks, etc. For example, the popularity of "Mary":
+`dplyr` *window functions* take `n` values and return `n` values. This is useful for computing lags, ranks, etc. For example, the popularity of "Mary":
 
 
 ```r
@@ -1816,7 +1821,8 @@ type: prompt
 babynames %>% 
   filter(sex == 'F') %>% 
   group_by(year) %>% 
-  summarise(fifth=nth(name, 5, order_by=desc(prop)))
+  summarise(fifth = nth(name, 5, 
+                      order_by = desc(prop)))
 ```
 
 ```
@@ -1951,7 +1957,7 @@ system.time(sqrt(1:1e6))
 
 ```
    user  system elapsed 
-  0.006   0.003   0.009 
+  0.006   0.003   0.008 
 ```
 
 The `microbenchmark` package provides much more precise timing and can be very useful.
@@ -2010,7 +2016,7 @@ system.time(for(i in 1:1e6) sqrt(i))
 
 ```
    user  system elapsed 
-  0.200   0.002   0.206 
+  0.203   0.001   0.206 
 ```
 
 ```r
@@ -2019,7 +2025,7 @@ system.time(sqrt(1:1e6))
 
 ```
    user  system elapsed 
-  0.004   0.002   0.007 
+  0.004   0.000   0.004 
 ```
 
 Some functions are known to be particularly slow, e.g. `ifelse`.
@@ -2041,9 +2047,9 @@ microbenchmark(
 
 ```
 Unit: nanoseconds
-     expr  min   lq    mean median     uq   max neval
-     pmax 3836 4045 5277.22 4237.0 4574.5 46025   100
- pmax.int  422  466  768.11  513.5  640.0 19117   100
+     expr  min     lq    mean median     uq   max neval
+     pmax 3829 4106.5 5898.86 4299.5 4798.5 49392   100
+ pmax.int  424  467.5  944.10  533.0  651.0 19795   100
 ```
 
 
@@ -2105,8 +2111,8 @@ microbenchmark("f"=f(), "fc"=fc())
 ```
 Unit: milliseconds
  expr      min       lq     mean   median       uq      max neval
-    f 128.5962 137.3379 144.9576 142.6184 147.9993 212.5545   100
-   fc 156.1077 165.7081 173.8322 169.5408 175.5773 240.5896   100
+    f 129.9580 137.5874 142.4279 140.8487 143.8499 216.2845   100
+   fc 158.2409 164.4974 172.2762 168.4660 172.7314 238.9767   100
 ```
 
 
@@ -2115,7 +2121,7 @@ Moving away from R
 
 * R now has good support (the built-in `parallel` package) for basic parallelization. See also the `foreach` package, which allows you to connect arbitrary backends to your code.
 
-* Faster, experimental versions of R are available - e.g. `pqr` (pretty quick R).
+* Faster, experimental versions of R are available - e.g. `pqr` (Pretty Quick R).
 
 * The extremely popular `Rcpp` package offers seamless integration between R and C++.
 

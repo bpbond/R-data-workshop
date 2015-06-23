@@ -639,22 +639,15 @@ Exercise: Examining data frames
 type: prompt
 incremental: true
 
-```{r, eval=FALSE}
-cat(nrow(babynames), ncol(babynames), babynames[12345, "name"])
+```{r, eval=TRUE}
+cat(dim(babynames), 
+    as.character(babynames[12345, "name"]), 
+    length(unique(babynames$name)))
 
 s <- babynames[sample(1:nrow(babynames), 
                       0.01 * nrow(babynames)),]
 
 sum(babynames$year < 1900) # faster and more memory-efficient than nrow(subset(...))
-```
-
-```{r, echo=FALSE}
-bn <- as.data.frame(babynames)
-cat(nrow(bn), ncol(bn), bn[12345, "name"])
-
-s <- babynames[sample(1:nrow(babynames), 0.01 * nrow(babynames)),]
-
-sum(babynames$year < 1900) # better than nrow(subset(...))
 ```
 
 
@@ -773,7 +766,8 @@ samplenums
 
 ```{r}
 # Vectorised: fast and elegant
-newvalve <- c(TRUE, vnums[-length(vnums)] != vnums[-1])
+newvalve <- c(TRUE,
+              vnums[-length(vnums)] != vnums[-1])
 cumsum(newvalve)
 ```
 
@@ -1208,7 +1202,8 @@ We can apply (multiple) functions across (multiple) columns.
 iris %>% 
   group_by(Species) %>% 
   summarise_each(funs(mean, sd), 
-                 Petal.Width, Sepal.Length)
+                 Petal.Width, Sepal.Length) %>%
+  str()
 ```
 
 
@@ -1291,7 +1286,7 @@ Useful summary functions
 Window functions
 ========================================================
 
-*Window functions* take `n` values and return `n` values. This can be useful for computing lags, ranks, etc. For example, the popularity of "Mary":
+`dplyr` *window functions* take `n` values and return `n` values. This is useful for computing lags, ranks, etc. For example, the popularity of "Mary":
 
 ```{r, eval=FALSE}
 babynames %>% 
@@ -1363,7 +1358,8 @@ type: prompt
 babynames %>% 
   filter(sex == 'F') %>% 
   group_by(year) %>% 
-  summarise(fifth=nth(name, 5, order_by=desc(prop)))
+  summarise(fifth = nth(name, 5, 
+                      order_by = desc(prop)))
 ```
 
 
@@ -1578,7 +1574,7 @@ Moving away from R
 
 * R now has good support (the built-in `parallel` package) for basic parallelization. See also the `foreach` package, which allows you to connect arbitrary backends to your code.
 
-* Faster, experimental versions of R are available - e.g. `pqr` (pretty quick R).
+* Faster, experimental versions of R are available - e.g. `pqr` (Pretty Quick R).
 
 * The extremely popular `Rcpp` package offers seamless integration between R and C++.
 
