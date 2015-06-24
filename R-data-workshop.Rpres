@@ -86,7 +86,7 @@ Things you should know: basics
 
 - The idea of *objects*, *functions*, *assignment*, and *comments*
 ```{r, eval=FALSE}
-x <- 10 # `x` is an object
+x <- 10 + 2 # `x` is an object
 sum(x) # `sum` is a function
 ```
 
@@ -143,13 +143,13 @@ Things you should know: data frames
 - Basic data frame indexing
 ```{r, echo=TRUE}
 cars[1,]
-cars[c(1, 3:4),]
+cars[c(1, 3, 4),]
 ```
 
 ***
 
 ```{r, echo=TRUE}
-# Rows and columns can be specified by number or name.
+# Rows and columns can be specified by number or name
 cars[3, "dist"]
 cars$dist[3]
 ```
@@ -166,7 +166,7 @@ d <- data.frame(xdsfjk=1:3)
 d$x
 ```
 
-In particular, you need to be careful using any `x`, or checking for `is.null(x)`, if another column exists whose name begins with the same pattern.
+In particular, you need to be careful using any column `x`, or checking for `is.null(x)`, if another column exists whose name begins with the same pattern.
 
 This applies to both data frames and lists.
 
@@ -185,12 +185,16 @@ for(i in 1:4) { cat(i) }
 ```
 
 
-Things you should know: programs
+Things you should know: scripts
 ========================================================
 
-The difference between a *script* and *command line*.
+The difference between a *script* (stored program) and *command line* (immediate response).
 
 In general, you want to use scripts, which provide *persistence* and *reproducibility*.
+
+```{r, eval=FALSE}
+source("myscript.R")
+```
 
 ***
 
@@ -320,14 +324,15 @@ Use a clear, consistent code style. Many examples are available.
 
 These two code snippets do the same thing. Which is easier to read? 
 ```{r, eval=FALSE}
-finaldata <- plot(merge(process(read.csv( "rawdata.csv")), otherdata))
+finaldata <- merge(process(read.csv( "rawdata.csv")), otherdata)
 ```
 
 ```{r, eval=FALSE}
-finaldata <- read.csv("rawdata.csv") %>%
+# Read data, process and merge it, and plot
+  read.csv("rawdata.csv") %>%
   process() %>%
-  merge(otherdata) %>%
-  plot()
+  merge(otherdata) ->
+finaldata
 ```
 
 
@@ -573,22 +578,19 @@ Subsetting data frames
 
 Data frames are indexed by row *first* and column *second* (in the more general case of multidimensional arrays, the other dimensions follow).
 ```{r}
-cars[1, ]
+cars[1:3, ]
 ```
 
 ***
 
-```{r}
-cars[1:3, ]
-```
-
 Negative notation excludes!
 
 ```{r}
-cars[2, -1] 
+cars[2, -1]
+cars[2, -1, drop=FALSE]
 ```
 
-R generally simplifies objects when it can...see `drop`
+**Gotcha #2½**: R generally simplifies objects when it can...see `drop()`
 
 
 Examining data frames
@@ -912,7 +914,7 @@ If you're used to spreadsheets, it's more common to use data in *wide format*: a
 
 For data processing in R, *long format* is almost always better: each row is one time point per subject.
 
-Variables are one of two types: `id` variables, which are typically assigned; and `measure` variables, which are measured (observations). But it's not always obvious
+Variables are one of two types: *id* variables, which are typically assigned; and *measure* variables, which are measured (observations). But it's not always obvious
 - What is a variable?
 - What is a unit of observation?
 - Which data should go in each row?
@@ -987,7 +989,7 @@ Exercise: Reshaping data
 ========================================================
 type: prompt
 
-1. What variables are `id` in the `iris` data? What are the measured variable(s)?
+1. What variables are *id* in the `iris` data? What are the *measured* variable(s)?
 
 2. From a data manipulation aspect, what is particularly inconvenient about the `iris` structure (look at the column names)?
 
@@ -997,6 +999,18 @@ type: prompt
 
 5. Melt the `pew` data into a `pew_long` dataframe.
 
+
+Exercise: Reshaping data
+========================================================
+type: prompt
+
+`iris` is *wide*: multiple observations of different individuals per row.
+
+1. `iris$Species` is an *id* variable; the others are *measured*.
+2. The `iris` column names conflate two *measured* variables: plant part (sepal or petal) and axis measured (width or length). We would probably want to split these labels into separate columns.
+3. Melt with `id.var = 'Species'`. Possible reshapes using `dcast` include `Species ~ variable`, `variable ~ Species`, `variable ~ .`, `Species ~ .`.
+4. Because there's more than one entry for each combination of `variable` and `Species`, and we haven't supplied an *aggregation function*.
+5. `pew_long <- melt(pew, id.var="religion")`
 
 Merging datasets
 ========================================================
@@ -1041,9 +1055,9 @@ Thinking back to the typical data pipeline, we often want to summarize data by g
 
 Specific examples:
 
+* `cars`: for each speed, what's the farthest distance traveled?
 * `iris`: how many samples were taken from each species?
 * `babynames`: what's the most common name over time?
-* `cars`: for each speed, what's the farthest distance traveled?
 
 
 Split-apply-combine
@@ -1203,7 +1217,7 @@ iris %>%
   group_by(Species) %>% 
   summarise_each(funs(mean, sd), 
                  Petal.Width, Sepal.Length) %>%
-  str()
+  names()
 ```
 
 
@@ -1280,7 +1294,7 @@ Useful summary functions
 
 * `n()` - number of observations in current group
 * `n_distinct(x)` - number of unique values in `x`
-* `first(x)`, `last(x)`, `nth(x, n)` - extract particular elements from a group
+* `first(x)`, `last(x)`, `nth(x, n)` - extract particular elements from a group. These all have an `order_by` parameter to specify an ordering
 
 
 Window functions

@@ -84,7 +84,7 @@ Things you should know: basics
 - The idea of *objects*, *functions*, *assignment*, and *comments*
 
 ```r
-x <- 10 # `x` is an object
+x <- 10 + 2 # `x` is an object
 sum(x) # `sum` is a function
 ```
 
@@ -203,7 +203,7 @@ cars[1,]
 ```
 
 ```r
-cars[c(1, 3:4),]
+cars[c(1, 3, 4),]
 ```
 
 ```
@@ -217,7 +217,7 @@ cars[c(1, 3:4),]
 
 
 ```r
-# Rows and columns can be specified by number or name.
+# Rows and columns can be specified by number or name
 cars[3, "dist"]
 ```
 
@@ -250,7 +250,7 @@ d$x
 [1] 1 2 3
 ```
 
-In particular, you need to be careful using any `x`, or checking for `is.null(x)`, if another column exists whose name begins with the same pattern.
+In particular, you need to be careful using any column `x`, or checking for `is.null(x)`, if another column exists whose name begins with the same pattern.
 
 This applies to both data frames and lists.
 
@@ -281,12 +281,17 @@ for(i in 1:4) { cat(i) }
 ```
 
 
-Things you should know: programs
+Things you should know: scripts
 ========================================================
 
-The difference between a *script* and *command line*.
+The difference between a *script* (stored program) and *command line* (immediate response).
 
 In general, you want to use scripts, which provide *persistence* and *reproducibility*.
+
+
+```r
+source("myscript.R")
+```
 
 ***
 
@@ -307,7 +312,7 @@ qplot(speed, dist, data=cars)
 
 ***
 
-![plot of chunk unnamed-chunk-12](R-data-workshop-figure/unnamed-chunk-12-1.png) 
+![plot of chunk unnamed-chunk-13](R-data-workshop-figure/unnamed-chunk-13-1.png) 
 
 
 Quiz: Basics
@@ -444,15 +449,16 @@ Use a clear, consistent code style. Many examples are available.
 These two code snippets do the same thing. Which is easier to read? 
 
 ```r
-finaldata <- plot(merge(process(read.csv( "rawdata.csv")), otherdata))
+finaldata <- merge(process(read.csv( "rawdata.csv")), otherdata)
 ```
 
 
 ```r
-finaldata <- read.csv("rawdata.csv") %>%
+# Read data, process and merge it, and plot
+  read.csv("rawdata.csv") %>%
   process() %>%
-  merge(otherdata) %>%
-  plot()
+  merge(otherdata) ->
+finaldata
 ```
 
 
@@ -727,7 +733,7 @@ We already used `ggplot2` to plot the `cars` dataset. Can also do this using `ba
 plot(cars$speed, cars$dist)
 ```
 
-![plot of chunk unnamed-chunk-28](R-data-workshop-figure/unnamed-chunk-28-1.png) 
+![plot of chunk unnamed-chunk-29](R-data-workshop-figure/unnamed-chunk-29-1.png) 
 
 
 Subsetting data frames
@@ -771,18 +777,6 @@ Subsetting data frames
 Data frames are indexed by row *first* and column *second* (in the more general case of multidimensional arrays, the other dimensions follow).
 
 ```r
-cars[1, ]
-```
-
-```
-  speed dist
-1     4    2
-```
-
-***
-
-
-```r
 cars[1:3, ]
 ```
 
@@ -793,18 +787,29 @@ cars[1:3, ]
 3     7    4
 ```
 
+***
+
 Negative notation excludes!
 
 
 ```r
-cars[2, -1] 
+cars[2, -1]
 ```
 
 ```
 [1] 10
 ```
 
-R generally simplifies objects when it can...see `drop`
+```r
+cars[2, -1, drop=FALSE]
+```
+
+```
+  dist
+2   10
+```
+
+**Gotcha #2½**: R generally simplifies objects when it can...see `drop()`
 
 
 Examining data frames
@@ -820,10 +825,10 @@ babynames[sample(nrow(babynames), 3), ]
 ```
 Source: local data frame [3 x 5]
 
-  year sex    name  n         prop
-1 1944   F  Arlena 20 1.463743e-05
-2 1984   F Tanieka 10 5.548457e-06
-3 1975   F  Taniko  6 3.844727e-06
+  year sex     name  n         prop
+1 1992   F Tiffiany 14 6.986028e-06
+2 1998   F   Atziry  7 3.613118e-06
+3 2001   F  Akaylah 10 5.052381e-06
 ```
 This uses the extremely useful `sample()` function to randomly sample from a vector.
 
@@ -1234,7 +1239,7 @@ If you're used to spreadsheets, it's more common to use data in *wide format*: a
 
 For data processing in R, *long format* is almost always better: each row is one time point per subject.
 
-Variables are one of two types: `id` variables, which are typically assigned; and `measure` variables, which are measured (observations). But it's not always obvious
+Variables are one of two types: *id* variables, which are typically assigned; and *measure* variables, which are measured (observations). But it's not always obvious
 - What is a variable?
 - What is a unit of observation?
 - Which data should go in each row?
@@ -1370,7 +1375,7 @@ Exercise: Reshaping data
 ========================================================
 type: prompt
 
-1. What variables are `id` in the `iris` data? What are the measured variable(s)?
+1. What variables are *id* in the `iris` data? What are the *measured* variable(s)?
 
 2. From a data manipulation aspect, what is particularly inconvenient about the `iris` structure (look at the column names)?
 
@@ -1380,6 +1385,18 @@ type: prompt
 
 5. Melt the `pew` data into a `pew_long` dataframe.
 
+
+Exercise: Reshaping data
+========================================================
+type: prompt
+
+`iris` is *wide*: multiple observations of different individuals per row.
+
+1. `iris$Species` is an *id* variable; the others are *measured*.
+2. The `iris` column names conflate two *measured* variables: plant part (sepal or petal) and axis measured (width or length). We would probably want to split these labels into separate columns.
+3. Melt with `id.var = 'Species'`. Possible reshapes using `dcast` include `Species ~ variable`, `variable ~ Species`, `variable ~ .`, `Species ~ .`.
+4. Because there's more than one entry for each combination of `variable` and `Species`, and we haven't supplied an *aggregation function*.
+5. `pew_long <- melt(pew, id.var="religion")`
 
 Merging datasets
 ========================================================
@@ -1433,9 +1450,9 @@ Thinking back to the typical data pipeline, we often want to summarize data by g
 
 Specific examples:
 
+* `cars`: for each speed, what's the farthest distance traveled?
 * `iris`: how many samples were taken from each species?
 * `babynames`: what's the most common name over time?
-* `cars`: for each speed, what's the farthest distance traveled?
 
 
 Split-apply-combine
@@ -1651,17 +1668,12 @@ iris %>%
   group_by(Species) %>% 
   summarise_each(funs(mean, sd), 
                  Petal.Width, Sepal.Length) %>%
-  str()
+  names()
 ```
 
 ```
-Classes 'tbl_df', 'tbl' and 'data.frame':	3 obs. of  5 variables:
- $ Species          : Factor w/ 3 levels "setosa","versicolor",..: 1 2 3
- $ Petal.Width_mean : num  0.246 1.326 2.026
- $ Sepal.Length_mean: num  5.01 5.94 6.59
- $ Petal.Width_sd   : num  0.105 0.198 0.275
- $ Sepal.Length_sd  : num  0.352 0.516 0.636
- - attr(*, "drop")= logi TRUE
+[1] "Species"           "Petal.Width_mean"  "Sepal.Length_mean"
+[4] "Petal.Width_sd"    "Sepal.Length_sd"  
 ```
 
 
@@ -1727,7 +1739,7 @@ Useful summary functions
 
 * `n()` - number of observations in current group
 * `n_distinct(x)` - number of unique values in `x`
-* `first(x)`, `last(x)`, `nth(x, n)` - extract particular elements from a group
+* `first(x)`, `last(x)`, `nth(x, n)` - extract particular elements from a group. These all have an `order_by` parameter to specify an ordering
 
 
 Window functions
@@ -2048,8 +2060,8 @@ microbenchmark(
 ```
 Unit: nanoseconds
      expr  min     lq    mean median     uq   max neval
-     pmax 3829 4106.5 5898.86 4299.5 4798.5 49392   100
- pmax.int  424  467.5  944.10  533.0  651.0 19795   100
+     pmax 3899 4151.5 5588.32   4305 4511.5 51308   100
+ pmax.int  476  508.5  816.85    567  636.0 15356   100
 ```
 
 
