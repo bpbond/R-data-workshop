@@ -228,7 +228,7 @@ incremental: true
 
 ```{r}
 x <- -2:2
-x ** 2  # what does this print?
+x ^ 2  # what does this print?
 y <- x < 0  # what type is y?
 y
 ```
@@ -1257,7 +1257,7 @@ ggsave("images/babynames.png", width=8, height=5)
 
 <img src="images/babynames.png" width="850" />
 
-[Linda Darnell?](https://en.wikipedia.org/wiki/Linda_Darnell)
+https://en.wikipedia.org/wiki/Linda_(1946_song)
 
 
 Summarizing babynames
@@ -1562,7 +1562,7 @@ for(f in files_to_process) {
   
   # do something
   
-  first <- file.exists(tf)
+  first <- !file.exists(tf)
   write.table(d, file=tf, sep=",", append=!first, 
               col.names=first)
 }

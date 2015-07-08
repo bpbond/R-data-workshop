@@ -323,7 +323,7 @@ incremental: true
 
 ```r
 x <- -2:2
-x ** 2  # what does this print?
+x ^ 2  # what does this print?
 ```
 
 ```
@@ -825,10 +825,10 @@ babynames[sample(nrow(babynames), 3), ]
 ```
 Source: local data frame [3 x 5]
 
-  year sex     name  n         prop
-1 1992   F Tiffiany 14 6.986028e-06
-2 1998   F   Atziry  7 3.613118e-06
-3 2001   F  Akaylah 10 5.052381e-06
+  year sex    name  n         prop
+1 2005   M  Khyren  7 3.294310e-06
+2 1978   M Brently  7 4.096655e-06
+3 1927   F     Leo 58 4.691467e-05
 ```
 This uses the extremely useful `sample()` function to randomly sample from a vector.
 
@@ -1715,7 +1715,7 @@ Summarizing babynames
 
 <img src="images/babynames.png" width="850" />
 
-[Linda Darnell?](https://en.wikipedia.org/wiki/Linda_Darnell)
+https://en.wikipedia.org/wiki/Linda_(1946_song)
 
 
 Summarizing babynames
@@ -2059,9 +2059,9 @@ microbenchmark(
 
 ```
 Unit: nanoseconds
-     expr  min     lq    mean median     uq   max neval
-     pmax 3899 4151.5 5588.32   4305 4511.5 51308   100
- pmax.int  476  508.5  816.85    567  636.0 15356   100
+     expr  min   lq    mean median     uq   max neval
+     pmax 3994 4329 6676.94 4538.0 4998.5 72367   100
+ pmax.int  461  488  970.36  543.5  665.5 18678   100
 ```
 
 
@@ -2099,7 +2099,7 @@ for(f in files_to_process) {
   
   # do something
   
-  first <- file.exists(tf)
+  first <- !file.exists(tf)
   write.table(d, file=tf, sep=",", append=!first, 
               col.names=first)
 }
