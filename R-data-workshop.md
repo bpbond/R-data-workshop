@@ -312,7 +312,7 @@ qplot(speed, dist, data=cars)
 
 ***
 
-![plot of chunk unnamed-chunk-13](R-data-workshop-figure/unnamed-chunk-13-1.png) 
+![plot of chunk unnamed-chunk-13](R-data-workshop-figure/unnamed-chunk-2-1.png) 
 
 
 Quiz: Basics
