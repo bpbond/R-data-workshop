@@ -825,10 +825,10 @@ babynames[sample(nrow(babynames), 3), ]
 ```
 Source: local data frame [3 x 5]
 
-  year sex    name  n         prop
-1 2005   M  Khyren  7 3.294310e-06
-2 1978   M Brently  7 4.096655e-06
-3 1927   F     Leo 58 4.691467e-05
+  year sex     name  n         prop
+1 2008   M  Tarrell 16 7.351475e-06
+2 1998   M      Job 76 3.750392e-05
+3 1922   F Geraline 13 1.042108e-05
 ```
 This uses the extremely useful `sample()` function to randomly sample from a vector.
 
@@ -1969,7 +1969,7 @@ system.time(sqrt(1:1e6))
 
 ```
    user  system elapsed 
-  0.006   0.003   0.008 
+  0.005   0.003   0.007 
 ```
 
 The `microbenchmark` package provides much more precise timing and can be very useful.
@@ -2028,7 +2028,7 @@ system.time(for(i in 1:1e6) sqrt(i))
 
 ```
    user  system elapsed 
-  0.203   0.001   0.206 
+  0.139   0.001   0.140 
 ```
 
 ```r
@@ -2037,7 +2037,7 @@ system.time(sqrt(1:1e6))
 
 ```
    user  system elapsed 
-  0.004   0.000   0.004 
+  0.005   0.001   0.005 
 ```
 
 Some functions are known to be particularly slow, e.g. `ifelse`.
@@ -2059,9 +2059,9 @@ microbenchmark(
 
 ```
 Unit: nanoseconds
-     expr  min   lq    mean median     uq   max neval
-     pmax 3994 4329 6676.94 4538.0 4998.5 72367   100
- pmax.int  461  488  970.36  543.5  665.5 18678   100
+     expr  min     lq    mean median     uq   max neval
+     pmax 3889 4342.5 5353.12 4515.5 4823.5 30617   100
+ pmax.int  421  480.5 1146.74  524.5  624.0 36607   100
 ```
 
 
@@ -2123,8 +2123,8 @@ microbenchmark("f"=f(), "fc"=fc())
 ```
 Unit: milliseconds
  expr      min       lq     mean   median       uq      max neval
-    f 129.9580 137.5874 142.4279 140.8487 143.8499 216.2845   100
-   fc 158.2409 164.4974 172.2762 168.4660 172.7314 238.9767   100
+    f 120.3322 136.8505 148.4692 140.3278 148.2414 285.9785   100
+   fc 149.8045 162.9764 177.2602 168.8771 178.3044 308.0707   100
 ```
 
 
